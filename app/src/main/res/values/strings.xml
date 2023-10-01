@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">StockWise</string>
+    <string name="portfolio">Portfolio</string>
+    <string name="news">News</string>
+    <string name="settings">Settings</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Home Fragment</string>
+    <string name="hello_blank_fragment2">Portfolio Fragment</string>
+    <string name="hello_blank_fragment3">News Fragment</string>
+    <string name="hello_blank_fragment4">Settings Fragment</string>
 </resources>

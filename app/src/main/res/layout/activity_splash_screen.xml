@@ -15,7 +15,7 @@
         app:layout_constraintHorizontal_bias="0.481"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/stockwiselogo" />
+        app:srcCompat="@drawable/stockwiselogotransparentbg" />
 
     <TextView
         android:layout_width="wrap_content"

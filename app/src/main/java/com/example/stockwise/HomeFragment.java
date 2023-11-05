@@ -92,6 +92,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -205,9 +206,23 @@ public class HomeFragment extends Fragment {
 
     //recyclerview
     private void addSelectedStock(String stock) {
-        selectedStocks.add(stock);
-        selectedStocksAdapter.notifyDataSetChanged(); // Refresh the RecyclerView
+        String[] parts = stock.split(" "); // Split the stock by whitespace
+        if (parts.length > 1) {
+            String selectedSymbol = parts[0];
+            String selectedName = stock.substring(selectedSymbol.length()).trim();
+
+            String combined = selectedSymbol + "\n" + selectedName; // Combine symbol and name
+
+            selectedStocks.add(combined);
+            selectedStocksAdapter.notifyDataSetChanged(); // Refresh the RecyclerView
+        } else {
+            // For suggestions, no splitting required
+            selectedStocks.add(stock);
+            selectedStocksAdapter.notifyDataSetChanged();
+        }
     }
+
+
     private void filterStocks(String newText) {
         MatrixCursor filterCursor = new MatrixCursor(new String[]{BaseColumns._ID, "stock_name"});
         for (int i = 0; i < allStocks.size(); i++) {

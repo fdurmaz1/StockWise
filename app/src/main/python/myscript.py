@@ -10,10 +10,11 @@ def get_stock_symbols_with_names():
     for index, row in stock_list_with_names.iterrows():
         symbol = index
         if not isinstance(row['Security Name'], float):  # Check if the value is not a float
-            security_name_words = row['Security Name'].split()[:3]  # Extract first four words
-            shortened_name = ' '.join(security_name_words)
+            name_parts = row['Security Name'].split(' ')[:3]  # Take the first three words
+            shortened_name = ' '.join(name_parts)
         else:
             shortened_name = str(row['Security Name'])  # Convert float to string
-        formatted_output.append(f"{symbol} - {shortened_name}")
+        formatted_output.append(f"{symbol} {shortened_name}")  # Removed the dash
 
     return formatted_output
+

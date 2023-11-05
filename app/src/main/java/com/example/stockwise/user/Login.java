@@ -147,7 +147,7 @@ public class Login extends AppCompatActivity {
                 data[0] = username;
                 data[1] = password;
 
-                PutData putData = new PutData("http://192.168.1.83/LoginRegister/login.php", "POST", field, data);
+                PutData putData = new PutData("http://192.168.1.82/LoginRegister/login.php", "POST", field, data);
 
                 if (putData.startPut()) {
                     if (putData.onComplete()) {

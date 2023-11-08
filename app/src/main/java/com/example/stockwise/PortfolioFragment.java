@@ -3,10 +3,15 @@ package com.example.stockwise;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -14,6 +19,10 @@ import android.view.ViewGroup;
  * create an instance of this fragment.
  */
 public class PortfolioFragment extends Fragment {
+
+    private RecyclerView recyclerViewPortfolio;
+    private static PortfolioStocksAdapter portfolioStocksAdapter;
+    private static List<String> portfolioStocks = new ArrayList<>();
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -56,9 +65,30 @@ public class PortfolioFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_portfolio, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_portfolio, container, false);
+
+        // Make sure the correct ID is used for the RecyclerView in fragment_portfolio layout
+        recyclerViewPortfolio = view.findViewById(R.id.recyclerViewPortfolio);
+
+        // Check for null before setting the adapter
+        if (recyclerViewPortfolio != null) {
+            recyclerViewPortfolio.setLayoutManager(new LinearLayoutManager(getContext()));
+            portfolioStocksAdapter = new PortfolioStocksAdapter(StockManager.getInstance().getSelectedStocks());
+            recyclerViewPortfolio.setAdapter(portfolioStocksAdapter);
+        }
+
+        return view;
+    }
+
+
+    // Function to add selected item to the PortfolioFragment's list
+
+    public void addToPortfolio(String selectedItem) {
+        portfolioStocks.add(selectedItem);
+
+        if (portfolioStocksAdapter != null) {
+            portfolioStocksAdapter.notifyDataSetChanged();
+        }
     }
 }

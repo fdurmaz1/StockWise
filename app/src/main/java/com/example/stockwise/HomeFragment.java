@@ -1,7 +1,6 @@
 package com.example.stockwise;
 
 import android.annotation.SuppressLint;
-import android.app.SearchManager;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
@@ -13,12 +12,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.provider.BaseColumns;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
@@ -39,27 +36,17 @@ import java.util.List;
  */
 public class HomeFragment extends Fragment {
 
-    TextView textView, tv;
-    EditText et1,et2;
-    Button Btn;
-    boolean initialSelection = true;
-    RecyclerView recyclerView;
-
+    private RecyclerView recyclerView;
 
     //search
     private SearchView searchView;
     private MatrixCursor cursor;
     private List<String> allStocks = new ArrayList<>();
 
-
     private List<String> filteredStocks = new ArrayList<>();
-
     private SelectedStocksAdapter selectedStocksAdapter;
     private List<String> selectedStocks = new ArrayList<>();
 
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
@@ -71,15 +58,6 @@ public class HomeFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment HomeFragment.
-     */
-    // TODO: Rename and change types and number of parameters
     public static HomeFragment newInstance(String param1, String param2) {
         HomeFragment fragment = new HomeFragment();
         Bundle args = new Bundle();
@@ -98,7 +76,6 @@ public class HomeFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-
     }
 
     @Override
@@ -108,30 +85,16 @@ public class HomeFragment extends Fragment {
 
         searchView = view.findViewById(R.id.searchView);
         recyclerView = view.findViewById(R.id.recyclerview);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        // Create adapter if null
+        if (selectedStocksAdapter == null) {
+            selectedStocksAdapter = new SelectedStocksAdapter(selectedStocks);
+            recyclerView.setAdapter(selectedStocksAdapter);
+        }
         new PythonDataFetchTask().execute();
 
-//        //start python
-//        if (!Python.isStarted()) {
-//            Python.start(new AndroidPlatform(getActivity()));
-//        }
-//
-//
-//        Python py = Python.getInstance();
-//        PyObject pyObject = py.getModule("myscript");
-//        PyObject getStockSymbols = pyObject.callAttr("get_stock_symbols_with_names");
-//        List<String> stockList = new ArrayList<>();
-//        for (PyObject item : getStockSymbols.asList()) {
-//            stockList.add(item.toString());
-//        }
-//
-//        cursor = new MatrixCursor(new String[]{BaseColumns._ID, "stock_name"});
-//        for (PyObject item : getStockSymbols.asList()) {
-//            allStocks.add(item.toString());
-//            cursor.addRow(new Object[]{allStocks.size() - 1, item.toString()});
-//        }
-//
-//        // Inside your HomeFragment...
-//
         StockSuggestionAdapter suggestionAdapter = new StockSuggestionAdapter(getActivity(), cursor, 0);
         searchView.setSuggestionsAdapter(suggestionAdapter);
 
@@ -167,16 +130,6 @@ public class HomeFragment extends Fragment {
                 return true;
             }
         });
-
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerview);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-        // Create adapter if null
-        if (selectedStocksAdapter == null) {
-            selectedStocksAdapter = new SelectedStocksAdapter(selectedStocks);
-            recyclerView.setAdapter(selectedStocksAdapter);
-        }
-
 
 
         // Set up search functionality and handle search suggestions click

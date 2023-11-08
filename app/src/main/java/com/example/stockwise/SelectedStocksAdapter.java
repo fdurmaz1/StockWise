@@ -15,12 +15,17 @@ import java.util.List;
 
 public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAdapter.SelectedStocksViewHolder> {
     private List<String> selectedStocks;
+    private OnStockSelectedListener listener;
     private PortfolioFragment portfolioFragment;
 
+    interface OnStockSelectedListener {
+        void onStockSelected(String selectedItem);
+    }
 
     // Constructor to set the data
-    public SelectedStocksAdapter(List<String> selectedStocks) {
+    public SelectedStocksAdapter(List<String> selectedStocks, OnStockSelectedListener listener) {
         this.selectedStocks = selectedStocks;
+        this.listener = listener;
     }
 
     // ViewHolder for the adapter
@@ -57,7 +62,11 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
         holder.textStockName.setText(parts[1]);
 
         holder.imageView4.setOnClickListener(v -> {
+
             String selectedItem = selectedStocks.get(position);
+            if (listener != null) {
+                listener.onStockSelected(selectedItem);
+            }
             Toast.makeText(holder.itemView.getContext(), "Added to your portfolio", Toast.LENGTH_SHORT).show();
 
             StockManager.getInstance().addStock(selectedItem); // Add the selected stock to the shared list

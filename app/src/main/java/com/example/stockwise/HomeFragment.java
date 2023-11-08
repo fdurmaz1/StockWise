@@ -34,7 +34,7 @@ import java.util.List;
  * Use the {@link HomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements SelectedStocksAdapter.OnStockSelectedListener {
 
     private RecyclerView recyclerView;
 
@@ -90,9 +90,10 @@ public class HomeFragment extends Fragment {
 
         // Create adapter if null
         if (selectedStocksAdapter == null) {
-            selectedStocksAdapter = new SelectedStocksAdapter(selectedStocks);
+            selectedStocksAdapter = new SelectedStocksAdapter(selectedStocks, this); // Pass 'this' as OnStockSelectedListener
             recyclerView.setAdapter(selectedStocksAdapter);
         }
+
         new PythonDataFetchTask().execute();
 
         StockSuggestionAdapter suggestionAdapter = new StockSuggestionAdapter(getActivity(), cursor, 0);
@@ -156,6 +157,12 @@ public class HomeFragment extends Fragment {
 
     }
 
+
+    @Override
+    public void onStockSelected(String selectedItem) {
+        selectedStocks.remove(selectedItem); // Remove the selected item
+        selectedStocksAdapter.notifyDataSetChanged(); // Refresh RecyclerView
+    }
 
     //recyclerview
     private void addSelectedStock(String stock) {

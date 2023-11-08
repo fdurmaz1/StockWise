@@ -85,10 +85,11 @@ public class PortfolioFragment extends Fragment {
     // Function to add selected item to the PortfolioFragment's list
 
     public void addToPortfolio(String selectedItem) {
-        portfolioStocks.add(selectedItem);
-
-        if (portfolioStocksAdapter != null) {
-            portfolioStocksAdapter.notifyDataSetChanged();
+        if (!portfolioStocks.contains(selectedItem)) {
+            portfolioStocks.add(selectedItem);
+            if (portfolioStocksAdapter != null) {
+                portfolioStocksAdapter.notifyDataSetChanged();
+            }
         }
     }
 }

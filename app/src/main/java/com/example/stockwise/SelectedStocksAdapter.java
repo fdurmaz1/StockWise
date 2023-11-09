@@ -1,5 +1,6 @@
 package com.example.stockwise;
 
+import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,9 +12,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.chaquo.python.PyException;
+import com.chaquo.python.PyObject;
+import com.chaquo.python.Python;
+
 import java.util.List;
 
 public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAdapter.SelectedStocksViewHolder> {
+    private final Context context;
     private List<String> selectedStocks;
     private OnStockSelectedListener listener;
     private PortfolioFragment portfolioFragment;
@@ -23,7 +29,8 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
     }
 
     // Constructor to set the data
-    public SelectedStocksAdapter(List<String> selectedStocks, OnStockSelectedListener listener) {
+    public SelectedStocksAdapter(Context context, List<String> selectedStocks, OnStockSelectedListener listener) {
+        this.context = context; // Initialize the context
         this.selectedStocks = selectedStocks;
         this.listener = listener;
     }
@@ -32,11 +39,14 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
     public static class SelectedStocksViewHolder extends RecyclerView.ViewHolder {
         TextView textStockSymbol;
         TextView textStockName;
+        TextView textStockClosePrice;
+
         ImageView imageView4;
         public SelectedStocksViewHolder(View itemView) {
             super(itemView);
             textStockSymbol = itemView.findViewById(R.id.textStockSymbol);
             textStockName = itemView.findViewById(R.id.textStockName);
+            textStockClosePrice = itemView.findViewById(R.id.textStockClosePrice);
             imageView4 = itemView.findViewById(R.id.imageView4);
             // Initialize other views here if required
         }
@@ -51,32 +61,58 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
 
     @Override
     public void onBindViewHolder(@NonNull SelectedStocksViewHolder holder, int position) {
-//        String stock = selectedStocks.get(position);
-//        holder.textStockSymbol.setText(stock);
-//        // Set other stock information if needed
-
         String combined = selectedStocks.get(position);
         String[] parts = combined.split("\n");
 
         holder.textStockSymbol.setText(parts[0]);
         holder.textStockName.setText(parts[1]);
 
-        holder.imageView4.setOnClickListener(v -> {
+        String selectedSymbol = parts[0]; // Get the stock symbol
 
+        // Fetch close price for the current symbol and update the respective TextView
+        double closePrice = getRecentClosePrice(selectedSymbol);
+
+        if (closePrice != -1) {
+            String formattedClosePrice = String.format("%.2f", closePrice);
+            holder.textStockClosePrice.setText(formattedClosePrice);
+        } else {
+            holder.textStockClosePrice.setText("N/A"); // Set default message when close price isn't available
+        }
+
+        // Plus sign click listener
+        holder.imageView4.setOnClickListener(v -> {
             String selectedItem = selectedStocks.get(position);
             if (listener != null) {
                 listener.onStockSelected(selectedItem);
             }
-            Toast.makeText(holder.itemView.getContext(), "Added to your portfolio", Toast.LENGTH_SHORT).show();
 
-            StockManager.getInstance().addStock(selectedItem); // Add the selected stock to the shared list
-
+            // Add the selected stock to the shared list
+            StockManager.getInstance().addStock(selectedItem);
+            // Notify any attached fragment or activity of the stock addition
+            // Replace 'portfolioFragment' with your actual fragment instance
             if (portfolioFragment != null) {
                 portfolioFragment.addToPortfolio(selectedItem);
-                Log.d("SelectedStocksAdapter", "Plus sign clicked");
             }
         });
     }
+
+    private double getRecentClosePrice(String symbol) {
+        Python py = Python.getInstance();
+        PyObject pyObject = py.getModule("myscript");
+        PyObject getRecentClosePrice = pyObject.callAttr("get_recent_close_price", symbol);
+
+        double closePrice = -1; // Set a default value in case of failure
+
+        try {
+            // Attempt to retrieve the close price from the Python script
+            closePrice = getRecentClosePrice.toDouble();
+        } catch (PyException e) {
+            e.printStackTrace(); // Handle any exceptions here
+        }
+
+        return closePrice;
+    }
+
 
     @Override
     public int getItemCount() {

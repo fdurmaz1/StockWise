@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -22,6 +23,7 @@ import android.widget.EditText;
 import android.widget.SearchView;
 import android.widget.TextView;
 
+import com.chaquo.python.PyException;
 import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
@@ -85,12 +87,11 @@ public class HomeFragment extends Fragment implements SelectedStocksAdapter.OnSt
 
         searchView = view.findViewById(R.id.searchView);
         recyclerView = view.findViewById(R.id.recyclerview);
-
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         // Create adapter if null
         if (selectedStocksAdapter == null) {
-            selectedStocksAdapter = new SelectedStocksAdapter(selectedStocks, this); // Pass 'this' as OnStockSelectedListener
+            selectedStocksAdapter = new SelectedStocksAdapter(requireContext(), selectedStocks, this);
             recyclerView.setAdapter(selectedStocksAdapter);
         }
 
@@ -111,9 +112,17 @@ public class HomeFragment extends Fragment implements SelectedStocksAdapter.OnSt
                 @SuppressLint("Range") String selectedStock = cursor.getString(cursor.getColumnIndex("stock_name"));
                 searchView.setQuery(selectedStock, true);
 
+                // Extract the stock symbol from the selected stock name
+                String[] parts = selectedStock.split(" ");
+                String stockSymbol = parts[0];
+
+                // Invoke method to get the latest closing price and update the UI
+                updateStockClosePrice(stockSymbol);
+
                 return true;
             }
         });
+
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -247,4 +256,26 @@ public class HomeFragment extends Fragment implements SelectedStocksAdapter.OnSt
             searchView.setSuggestionsAdapter(suggestionAdapter);
         }
     }
+
+    private void updateStockClosePrice(String stockSymbol) {
+        Python py = Python.getInstance();
+        PyObject pyObject = py.getModule("myscript");
+        PyObject getRecentClosePrice = pyObject.callAttr("get_recent_close_price", stockSymbol);
+
+        try {
+            double closePrice = getRecentClosePrice.toDouble(); // Try converting to double
+
+            // Example of setting the retrieved close price to the first item in the RecyclerView
+            if (!selectedStocks.isEmpty()) {
+                String selectedSymbol = selectedStocks.get(0).split("\n")[0]; // Get the stock symbol
+                if (selectedSymbol.equals(stockSymbol)) {
+
+                }
+            }
+        } catch (PyException e) {
+            // Handle the case when the price retrieval fails or the returned value isn't numeric
+            e.printStackTrace();
+        }
+    }
+
 }

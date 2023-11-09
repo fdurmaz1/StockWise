@@ -1,5 +1,7 @@
 import pandas_datareader as pdr
 from pandas_datareader.nasdaq_trader import get_nasdaq_symbols
+import datetime as dt
+import yfinance as yfin
 
 def get_stock_symbols_with_names():
     nasdaq_symbols = get_nasdaq_symbols()
@@ -18,3 +20,12 @@ def get_stock_symbols_with_names():
 
     return formatted_output
 
+def get_recent_close_price(stock_symbol):
+    end = dt.datetime.now()
+    start = end - dt.timedelta(days=1)
+
+    yfin.pdr_override()
+    df = pdr.data.get_data_yahoo(stock_symbol, start, end)
+
+    latest_close_price = df['Close'].iloc[-1]
+    return latest_close_price

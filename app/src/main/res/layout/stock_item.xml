@@ -18,27 +18,48 @@
             android:id="@+id/textStockSymbol"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/nunitosansregular"
+            android:layout_marginEnd="172dp"
             android:textColor="#000000"
             android:textColorHighlight="@color/white"
             android:textSize="18sp"
-            app:layout_constraintEnd_toStartOf="@+id/imageView4"
+            app:layout_constraintBottom_toTopOf="@+id/textStockName"
+            app:layout_constraintEnd_toStartOf="@+id/textStockClosePrice"
             app:layout_constraintHorizontal_bias="0.015"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
 
         <TextView
             android:id="@+id/textStockName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/nunitosansregular"
+            android:layout_marginEnd="125dp"
             android:textColor="#000000"
             android:textColorHighlight="@color/white"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/imageView4"
-            app:layout_constraintHorizontal_bias="0.025"
+            app:layout_constraintEnd_toStartOf="@+id/textStockClosePrice"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textStockSymbol"
-            app:layout_constraintVertical_bias="0.25" />
+            app:layout_constraintVertical_bias="0.25"
+            app:layout_constraintHorizontal_bias="0.012"
+
+            />
+
+        <TextView
+            android:id="@+id/textStockClosePrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="32dp"
+            android:fontFamily="@font/nunitosansregular"
+            android:text="StockClosePrice"
+            android:textColor="#000000"
+            android:textColorHighlight="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imageView4"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/imageView4"
@@ -48,7 +69,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/baseline_add_box_24"
-            app:tint="@color/stockwise"/>
+            app:tint="@color/stockwise" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>

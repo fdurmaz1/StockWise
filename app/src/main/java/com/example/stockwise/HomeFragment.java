@@ -112,13 +112,6 @@ public class HomeFragment extends Fragment implements SelectedStocksAdapter.OnSt
                 @SuppressLint("Range") String selectedStock = cursor.getString(cursor.getColumnIndex("stock_name"));
                 searchView.setQuery(selectedStock, true);
 
-                // Extract the stock symbol from the selected stock name
-                String[] parts = selectedStock.split(" ");
-                String stockSymbol = parts[0];
-
-                // Invoke method to get the latest closing price and update the UI
-                updateStockClosePrice(stockSymbol);
-
                 return true;
             }
         });
@@ -257,25 +250,5 @@ public class HomeFragment extends Fragment implements SelectedStocksAdapter.OnSt
         }
     }
 
-    private void updateStockClosePrice(String stockSymbol) {
-        Python py = Python.getInstance();
-        PyObject pyObject = py.getModule("myscript");
-        PyObject getRecentClosePrice = pyObject.callAttr("get_recent_close_price", stockSymbol);
-
-        try {
-            double closePrice = getRecentClosePrice.toDouble(); // Try converting to double
-
-            // Example of setting the retrieved close price to the first item in the RecyclerView
-            if (!selectedStocks.isEmpty()) {
-                String selectedSymbol = selectedStocks.get(0).split("\n")[0]; // Get the stock symbol
-                if (selectedSymbol.equals(stockSymbol)) {
-
-                }
-            }
-        } catch (PyException e) {
-            // Handle the case when the price retrieval fails or the returned value isn't numeric
-            e.printStackTrace();
-        }
-    }
 
 }

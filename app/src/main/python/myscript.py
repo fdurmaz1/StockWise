@@ -21,11 +21,27 @@ def get_stock_symbols_with_names():
     return formatted_output
 
 def get_recent_close_price(stock_symbol):
-    end = dt.datetime.now()
-    start = end - dt.timedelta(days=1)
+    try:
+        end = dt.datetime.now()
+        start = end - dt.timedelta(days=1)
 
-    yfin.pdr_override()
-    df = pdr.data.get_data_yahoo(stock_symbol, start, end)
+        yfin.pdr_override()
+        df = pdr.data.get_data_yahoo(stock_symbol, start, end)
 
-    latest_close_price = df['Close'].iloc[-1]
-    return latest_close_price
+        # Check if the DataFrame is not empty
+        if not df.empty and 'Close' in df.columns:
+            # Check if there are any rows in the 'Close' series
+            if not df['Close'].empty:
+                # Access the latest close price
+                latest_close_price = df['Close'].iloc[-1]
+                return latest_close_price
+            else:
+                print("Error: 'Close' series is empty.")
+        else:
+            print(f"Error: DataFrame is empty or 'Close' column not found for {stock_symbol}")
+
+    except Exception as e:
+        print(f"Error fetching close price for {stock_symbol}: {e}")
+
+    # Return a default value or raise an exception based on your app's logic
+    return -1

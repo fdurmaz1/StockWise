@@ -1,6 +1,7 @@
 package com.example.stockwise;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chaquo.python.PyException;
 import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
+import com.vishnusivadas.advanced_httpurlconnection.PutData;
 
 import java.util.List;
 
@@ -68,6 +70,7 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
         holder.textStockName.setText(parts[1]);
 
         String selectedSymbol = parts[0]; // Get the stock symbol
+        String selectedName = parts[1];
 
         // Fetch close price for the current symbol and update the respective TextView
         double closePrice = getRecentClosePrice(selectedSymbol);
@@ -81,6 +84,8 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
 
         // Plus sign click listener
         holder.imageView4.setOnClickListener(v -> {
+
+            Toast.makeText(context, selectedSymbol + " AAND " + selectedName + " ADDED", Toast.LENGTH_SHORT).show();
             String selectedItem = selectedStocks.get(position);
             if (listener != null) {
                 listener.onStockSelected(selectedItem);
@@ -93,7 +98,22 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
             if (portfolioFragment != null) {
                 portfolioFragment.addToPortfolio(selectedItem);
             }
+            SharedPreferences sh = context.getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
+            int userId = sh.getInt("userid", -1);
+            if (userId != -1) {
+            String[] field = new String[]{"userid", "symbol", "name"};
+            String[] data = new String[]{String.valueOf(userId), selectedSymbol, selectedName};
+            PutData putData = new PutData("http://192.168.1.82/LoginRegister/add_portfolio_entry.php", "POST", field, data);
+            if (putData.startPut()) {
+                if (putData.onComplete()) {
+                    String result = putData.getResult();
+                    // Handle the response
+                    Toast.makeText(context, result, Toast.LENGTH_SHORT).show();
+                }
+            }
+            }
         });
+
     }
 
     private double getRecentClosePrice(String symbol) {

@@ -3,6 +3,7 @@ package com.example.stockwise.user;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,6 +20,9 @@ import com.example.stockwise.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.vishnusivadas.advanced_httpurlconnection.PutData;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.lang.ref.WeakReference;
 
 public class Login extends AppCompatActivity {
@@ -27,7 +31,6 @@ public class Login extends AppCompatActivity {
     Button buttonLogin;
     TextView textViewSignUp;
     static ProgressBar progressBar;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,11 +175,26 @@ public class Login extends AppCompatActivity {
 
             activity.progressBar.setVisibility(View.GONE);
 
-            if (result != null && result.equals("Login Success")) {
-                Toast.makeText(activity.getApplicationContext(), result, Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(activity.getApplicationContext(), MainActivity.class);
-                activity.startActivity(intent);
-                activity.finish();
+            if (result != null && result.contains("Login Success")) {
+                // Assuming the server response is a JSON object with the userid
+                try {
+                    JSONObject jsonObject = new JSONObject(result);
+                    int userId = jsonObject.getInt("userid"); // Adjust this key as per your actual JSON response
+
+                    // Store the userid in SharedPreferences
+                    SharedPreferences sharedPreferences = activity.getSharedPreferences("MySharedPref", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putInt("userid", userId);
+                    editor.apply();
+
+                    Toast.makeText(activity.getApplicationContext(), "Login Successful", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(activity.getApplicationContext(), MainActivity.class);
+                    activity.startActivity(intent);
+                    activity.finish();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    // Handle JSON parsing error
+                }
             } else {
                 Toast.makeText(activity.getApplicationContext(), result, Toast.LENGTH_SHORT).show();
             }

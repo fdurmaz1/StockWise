@@ -3,16 +3,21 @@ package com.example.stockwise;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -83,20 +88,37 @@ public class PortfolioFragment extends Fragment {
         recyclerViewPortfolio = view.findViewById(R.id.recyclerViewPortfolio);
         recyclerViewPortfolio.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Check for null before setting the adapter
-        if (recyclerViewPortfolio != null) {
-            recyclerViewPortfolio.setLayoutManager(new LinearLayoutManager(getContext()));
-            portfolioStocksAdapter = new PortfolioStocksAdapter(StockManager.getInstance().getSelectedStocks());
-            recyclerViewPortfolio.setAdapter(portfolioStocksAdapter);
-        }
+        portfolioStocksAdapter = new PortfolioStocksAdapter(new ArrayList<>());
+        recyclerViewPortfolio.setAdapter(portfolioStocksAdapter);
+
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MySharedPref", MODE_PRIVATE);
-        int userId = sharedPreferences.getInt("userid", -1); // Default to -1 if not found
+        int userId = sharedPreferences.getInt("userid", -1);
 
         if (userId != -1) {
             new FetchPortfolioStocksTask(this, userId).execute();
-        } else {
-            // Handle the case where user ID is not found
         }
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView,
+                                  @NonNull RecyclerView.ViewHolder viewHolder,
+                                  @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                String itemToDelete = portfolioStocksAdapter.getStockAtPosition(position);
+                if (itemToDelete != null) {
+                    deleteStockFromDatabase(itemToDelete, position);
+                } else {
+                    Log.d("SwipeDebug", "Item to delete is null or position is out of bounds");
+                    portfolioStocksAdapter.notifyItemChanged(position); // Reset the swiped item
+                }
+            }
+
+        }).attachToRecyclerView(recyclerViewPortfolio);
 
         return view;
     }
@@ -122,14 +144,16 @@ public class PortfolioFragment extends Fragment {
         protected void onPostExecute(List<String> stocks) {
             PortfolioFragment fragment = fragmentReference.get();
             if (fragment != null && stocks != null) {
-                PortfolioStocksAdapter adapter = new PortfolioStocksAdapter(stocks);
-                fragment.recyclerViewPortfolio.setAdapter(adapter);
+                fragment.portfolioStocksAdapter.setData(stocks); // Update the data in the adapter
+                fragment.recyclerViewPortfolio.setAdapter(fragment.portfolioStocksAdapter);
             }
         }
 
+
+
         private List<String> fetchStocksFromDatabase() {
             List<String> stocks = new ArrayList<>();
-            String urlString = "http://192.168.1.82/LoginRegister/get_user_portfolio.php?userid=" + userId;
+            String urlString = "http://192.168.1.78/LoginRegister/get_user_portfolio.php?userid=" + userId;
 
             try {
                 URL url = new URL(urlString);
@@ -174,4 +198,58 @@ public class PortfolioFragment extends Fragment {
             }
         }
     }
+
+    private void deleteStockFromDatabase(String stock, int position) {
+        String symbol = extractSymbolFromStockString(stock);
+        String urlString = "http://192.168.1.78/LoginRegister/delete_stock.php?symbol=" + Uri.encode(symbol);
+        Log.d("DeleteStock", "URL: " + urlString); // Log the URL
+
+        new AsyncTask<String, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(String... urls) {
+                try {
+                    URL url = new URL(urls[0]);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+
+                    int responseCode = conn.getResponseCode();
+                    Log.d("DeleteStock", "Response Code: " + responseCode);
+
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    String line;
+                    StringBuilder response = new StringBuilder();
+                    while ((line = reader.readLine()) != null) {
+                        response.append(line);
+                    }
+                    reader.close();
+
+                    Log.d("DeleteStock", "Response: " + response.toString());
+                    return response.toString().contains("Stock Deleted Successfully");
+                } catch (Exception e) {
+                    Log.e("DeleteStock", "Error in network request", e);
+                    return false;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Boolean success) {
+                if (success) {
+                    portfolioStocksAdapter.removeItem(position); // Call removeItem here
+                    Log.d("DeleteStock", "Item removed from RecyclerView");
+                } else {
+                    Log.d("DeleteStock", "Failed to delete item from server");
+                    portfolioStocksAdapter.notifyItemChanged(position); // Reset the swiped item
+                }
+            }
+        }.execute(urlString);
+    }
+
+    private String extractSymbolFromStockString(String stock) {
+        if (stock == null || !stock.contains("\n")) {
+            return null;
+        }
+        return stock.split("\n")[0];
+    }
+
+
 }

@@ -1,5 +1,6 @@
 package com.example.stockwise;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,7 @@ import com.chaquo.python.Python;
 
 import java.util.List;
 
-public class PortfolioStocksAdapter extends RecyclerView.Adapter<PortfolioStocksAdapter.PortfolioStocksViewHolder>{
+public class PortfolioStocksAdapter extends RecyclerView.Adapter<PortfolioStocksAdapter.PortfolioStocksViewHolder> {
 
     private List<String> portfolioStocks;
 
@@ -86,4 +87,33 @@ public class PortfolioStocksAdapter extends RecyclerView.Adapter<PortfolioStocks
     public int getItemCount() {
         return portfolioStocks.size();
     }
+
+    public String getStockAtPosition(int position) {
+        if (position >= 0 && position < portfolioStocks.size()) {
+            return portfolioStocks.get(position);
+        } else {
+            Log.d("SwipeDebug", "Item to delete is null or position is out of bounds");
+            return null;
+        }
+    }
+
+    public void removeItem(int position) {
+        if (position >= 0 && position < portfolioStocks.size()) {
+            portfolioStocks.remove(position);
+            notifyItemRemoved(position);
+            notifyItemRangeChanged(position, getItemCount()); // Notify any remaining items have changed
+        }
+    }
+
+
+
+
+
+    public void setData(List<String> newData) {
+        this.portfolioStocks = newData;
+        notifyDataSetChanged();
+    }
+
+
+
 }

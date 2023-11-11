@@ -103,7 +103,7 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
             if (userId != -1) {
             String[] field = new String[]{"userid", "symbol", "name"};
             String[] data = new String[]{String.valueOf(userId), selectedSymbol, selectedName};
-            PutData putData = new PutData("http://192.168.1.82/LoginRegister/add_portfolio_entry.php", "POST", field, data);
+            PutData putData = new PutData("http://192.168.1.78/LoginRegister/add_portfolio_entry.php", "POST", field, data);
             if (putData.startPut()) {
                 if (putData.onComplete()) {
                     String result = putData.getResult();

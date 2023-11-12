@@ -4,10 +4,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import com.example.stockwise.databinding.ActivityMainBinding;
+
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,6 +39,16 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
+        scheduleUpdatePricesWorker();
+    }
+
+    private void scheduleUpdatePricesWorker() {
+        PeriodicWorkRequest updatePricesWorkRequest =
+                new PeriodicWorkRequest.Builder(UpdatePricesWorker.class, 24, TimeUnit.HOURS)
+                        .build();
+
+        WorkManager.getInstance(this).enqueue(updatePricesWorkRequest);
+        Log.d("MainActivity", "UpdatePricesWorker scheduled");
     }
 
     private void replaceFragment(Fragment fragment){
@@ -42,5 +57,7 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.replace(R.id.frame_layout, fragment);
         fragmentTransaction.commit();
     }
+
+
 
 }

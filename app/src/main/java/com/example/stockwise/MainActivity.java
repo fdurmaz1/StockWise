@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
@@ -45,10 +46,16 @@ public class MainActivity extends AppCompatActivity {
     private void scheduleUpdatePricesWorker() {
         PeriodicWorkRequest updatePricesWorkRequest =
                 new PeriodicWorkRequest.Builder(UpdatePricesWorker.class, 24, TimeUnit.HOURS)
+                        .addTag("updatePricesTag")
                         .build();
 
-        WorkManager.getInstance(this).enqueue(updatePricesWorkRequest);
-        Log.d("MainActivity", "UpdatePricesWorker scheduled");
+        // Enqueue the work request but only if it's not already scheduled
+        WorkManager.getInstance(this)
+                .enqueueUniquePeriodicWork("updatePrices",
+                        ExistingPeriodicWorkPolicy.KEEP,
+                        updatePricesWorkRequest);
+
+        Log.d("MainActivity", "UpdatePricesWorker scheduled or already running");
     }
 
     private void replaceFragment(Fragment fragment){

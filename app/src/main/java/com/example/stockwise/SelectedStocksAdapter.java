@@ -85,7 +85,7 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
         // Plus sign click listener
         holder.imageView4.setOnClickListener(v -> {
 
-            Toast.makeText(context, selectedSymbol + " AAND " + selectedName + " ADDED", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, selectedSymbol + " and " + selectedName + " added to your portfolio", Toast.LENGTH_SHORT).show();
             String selectedItem = selectedStocks.get(position);
             if (listener != null) {
                 listener.onStockSelected(selectedItem);
@@ -108,7 +108,7 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
                 if (putData.onComplete()) {
                     String result = putData.getResult();
                     // Handle the response
-                    Toast.makeText(context, result, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, result, Toast.LENGTH_SHORT).show();
                 }
             }
             }

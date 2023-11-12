@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
 
@@ -39,7 +40,7 @@ import java.util.List;
 public class HomeFragment extends Fragment implements SelectedStocksAdapter.OnStockSelectedListener {
 
     private RecyclerView recyclerView;
-
+    ProgressBar progressBar;
     //search
     private SearchView searchView;
     private MatrixCursor cursor;
@@ -88,6 +89,7 @@ public class HomeFragment extends Fragment implements SelectedStocksAdapter.OnSt
         searchView = view.findViewById(R.id.searchView);
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        progressBar = view.findViewById(R.id.progressBar2);
 
         // Create adapter if null
         if (selectedStocksAdapter == null) {
@@ -223,6 +225,7 @@ public class HomeFragment extends Fragment implements SelectedStocksAdapter.OnSt
 
         @Override
         protected List<String> doInBackground(Void... voids) {
+            progressBar.setVisibility(View.VISIBLE);
             if (!Python.isStarted()) {
                 Python.start(new AndroidPlatform(getActivity()));
             }
@@ -247,6 +250,7 @@ public class HomeFragment extends Fragment implements SelectedStocksAdapter.OnSt
 
             StockSuggestionAdapter suggestionAdapter = new StockSuggestionAdapter(getActivity(), cursor, 0);
             searchView.setSuggestionsAdapter(suggestionAdapter);
+            progressBar.setVisibility(View.GONE);
         }
     }
 

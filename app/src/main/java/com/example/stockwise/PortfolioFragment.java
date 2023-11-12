@@ -2,6 +2,7 @@ package com.example.stockwise;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.net.Uri;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -45,6 +47,8 @@ public class PortfolioFragment extends Fragment {
     private RecyclerView recyclerViewPortfolio;
     private static PortfolioStocksAdapter portfolioStocksAdapter;
     private static List<String> portfolioStocks = new ArrayList<>();
+    private ProgressBar progressBar;
+
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -86,11 +90,13 @@ public class PortfolioFragment extends Fragment {
         }
     }
 
+    @SuppressLint("MissingInflatedId")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_portfolio, container, false);
         recyclerViewPortfolio = view.findViewById(R.id.recyclerViewPortfolio);
         recyclerViewPortfolio.setLayoutManager(new LinearLayoutManager(getContext()));
+        progressBar = view.findViewById(R.id.progressBar3); // Initialize the ProgressBar
 
         portfolioStocksAdapter = new PortfolioStocksAdapter(new ArrayList<>());
         recyclerViewPortfolio.setAdapter(portfolioStocksAdapter);
@@ -154,11 +160,25 @@ public class PortfolioFragment extends Fragment {
         }
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            PortfolioFragment fragment = fragmentReference.get();
+            if (fragment != null && fragment.progressBar != null) {
+                fragment.progressBar.setVisibility(View.VISIBLE); // Show ProgressBar before fetching data
+            }
+        }
+        @Override
         protected void onPostExecute(List<String> stocks) {
             PortfolioFragment fragment = fragmentReference.get();
-            if (fragment != null && stocks != null) {
-                fragment.portfolioStocksAdapter.setData(stocks); // Update the data in the adapter
-                fragment.recyclerViewPortfolio.setAdapter(fragment.portfolioStocksAdapter);
+            if (fragment != null) {
+                if (fragment.progressBar != null) {
+                    fragment.progressBar.setVisibility(View.GONE); // Hide ProgressBar after fetching data
+                }
+
+                if (stocks != null) {
+                    fragment.portfolioStocksAdapter.setData(stocks); // Update data in adapter
+                    fragment.recyclerViewPortfolio.setAdapter(fragment.portfolioStocksAdapter);
+                }
             }
         }
 
@@ -214,6 +234,7 @@ public class PortfolioFragment extends Fragment {
 
     private void deleteStockFromDatabase(String stock, int position) {
         String symbol = extractSymbolFromStockString(stock);
+        String name = stock.substring(symbol.length()).trim();
         String urlString = "http://192.168.1.78/LoginRegister/delete_stock.php?symbol=" + Uri.encode(symbol);
         Log.d("DeleteStock", "URL: " + urlString); // Log the URL
 
@@ -248,10 +269,13 @@ public class PortfolioFragment extends Fragment {
             protected void onPostExecute(Boolean success) {
                 if (success) {
                     portfolioStocksAdapter.removeItem(position); // Call removeItem here
+                    Toast.makeText(getContext(), symbol + " and " + name + " removed from your portfolio", Toast.LENGTH_SHORT).show();
                     Log.d("DeleteStock", "Item removed from RecyclerView");
                 } else {
                     Log.d("DeleteStock", "Failed to delete item from server");
                     portfolioStocksAdapter.notifyItemChanged(position); // Reset the swiped item
+                    Toast.makeText(getContext(), "Failed to delete " + symbol, Toast.LENGTH_SHORT).show();
+
                 }
             }
         }.execute(urlString);

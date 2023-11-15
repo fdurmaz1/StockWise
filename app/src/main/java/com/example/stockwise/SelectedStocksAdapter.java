@@ -2,6 +2,7 @@ package com.example.stockwise;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +19,11 @@ import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
 import com.vishnusivadas.advanced_httpurlconnection.PutData;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.List;
 
 public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAdapter.SelectedStocksViewHolder> {
@@ -69,52 +75,55 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
         holder.textStockSymbol.setText(parts[0]);
         holder.textStockName.setText(parts[1]);
 
-        String selectedSymbol = parts[0]; // Get the stock symbol
-        String selectedName = parts[1];
+        double closePrice = getRecentClosePrice(parts[0]);
+        holder.textStockClosePrice.setText(closePrice != -1 ? String.format("%.2f", closePrice) : "N/A");
 
-        // Fetch close price for the current symbol and update the respective TextView
-        double closePrice = getRecentClosePrice(selectedSymbol);
-
-        if (closePrice != -1) {
-            String formattedClosePrice = String.format("%.2f", closePrice);
-            holder.textStockClosePrice.setText(formattedClosePrice);
-        } else {
-            holder.textStockClosePrice.setText("N/A"); // Set default message when close price isn't available
-        }
-
-        // Plus sign click listener
         holder.imageView4.setOnClickListener(v -> {
-
-            Toast.makeText(context, selectedSymbol + " and " + selectedName + " added to your portfolio", Toast.LENGTH_SHORT).show();
-            String selectedItem = selectedStocks.get(position);
-            if (listener != null) {
-                listener.onStockSelected(selectedItem);
-            }
-
-            // Add the selected stock to the shared list
-            StockManager.getInstance().addStock(selectedItem);
-            // Notify any attached fragment or activity of the stock addition
-            // Replace 'portfolioFragment' with your actual fragment instance
-            if (portfolioFragment != null) {
-                portfolioFragment.addToPortfolio(selectedItem);
-            }
             SharedPreferences sh = context.getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
             int userId = sh.getInt("userid", -1);
+            Log.d("StockCheck", "User ID: " + userId);
+
             if (userId != -1) {
-            String[] field = new String[]{"userid", "symbol", "name"};
-            String[] data = new String[]{String.valueOf(userId), selectedSymbol, selectedName};
-            PutData putData = new PutData("http://192.168.1.78/LoginRegister/add_portfolio_entry.php", "POST", field, data);
-            if (putData.startPut()) {
-                if (putData.onComplete()) {
-                    String result = putData.getResult();
-                    // Handle the response
-                    //Toast.makeText(context, result, Toast.LENGTH_SHORT).show();
-                }
-            }
+                Log.d("StockCheck", "Initiating check for stock: " + parts[0]);
+                isStockInPortfolio(parts[0], userId, isInPortfolio -> {
+                    Log.d("StockCheck", "Received isInPortfolio: " + isInPortfolio);
+                    if (!isInPortfolio) {
+                        Log.d("StockCheck", "Stock already in portfolio, not adding: " + parts[0]);
+                        Toast.makeText(context, "This stock is already in your portfolio", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Log.d("StockCheck", "Stock not in portfolio, adding: " + parts[0]);
+                        addStockToPortfolio(parts[0], parts[1], userId, position);
+                    }
+                });
+            } else {
+                Log.d("StockCheck", "Invalid User ID");
             }
         });
-
     }
+
+    private void addStockToPortfolio(String symbol, String name, int userId, int position) {
+        // Code to add stock to the portfolio
+        Toast.makeText(context, symbol + " added to your portfolio", Toast.LENGTH_SHORT).show();
+        String selectedItem = selectedStocks.get(position);
+        if (listener != null) {
+            listener.onStockSelected(selectedItem);
+        }
+        StockManager.getInstance().addStock(selectedItem);
+        if (portfolioFragment != null) {
+            portfolioFragment.addToPortfolio(selectedItem);
+        }
+        // Add the stock to the database
+        String[] field = new String[]{"userid", "symbol", "name"};
+        String[] data = new String[]{String.valueOf(userId), symbol, name};
+        PutData putData = new PutData("http://192.168.1.78/LoginRegister/add_portfolio_entry.php", "POST", field, data);
+        if (putData.startPut()) {
+            if (putData.onComplete()) {
+                String result = putData.getResult();
+                // Handle the response from adding to the database
+            }
+        }
+    }
+
 
     private double getRecentClosePrice(String symbol) {
         Python py = Python.getInstance();
@@ -138,4 +147,56 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
     public int getItemCount() {
         return selectedStocks.size();
     }
+
+    public interface StockCheckListener {
+        void onStockChecked(boolean isInPortfolio);
+    }
+
+
+
+    // Method to check if the stock already exists in the user's portfolio
+    private void isStockInPortfolio(String symbol, int userId, StockCheckListener listener) {
+        new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Void... voids) {
+                try {
+                    String urlString = "http://192.168.1.78/LoginRegister/check_stock_in_portfolio.php?userid=" + userId + "&symbol=" + URLEncoder.encode(symbol, "UTF-8");
+                    Log.d("StockCheck", "Checking URL: " + urlString);
+                    URL url = new URL(urlString);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+
+                    int responseCode = conn.getResponseCode();
+                    Log.d("StockCheck", "HTTP Response Code: " + responseCode);
+
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                        String inputLine;
+                        StringBuilder response = new StringBuilder();
+
+                        while ((inputLine = in.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+                        in.close();
+                        Log.d("StockCheck", "Response: " + response.toString().trim());
+
+                        // Check if the response indicates the stock is already in the portfolio
+                        return response.toString().trim().equals("Stock not in portfolio");
+                    }
+                } catch (Exception e) {
+                    Log.e("StockCheck", "Error checking stock in portfolio", e);
+                }
+                return false;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                listener.onStockChecked(result);
+            }
+        }.execute();
+    }
+
+
+
+
 }

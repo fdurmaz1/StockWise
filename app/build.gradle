@@ -31,6 +31,9 @@ android {
                 install "pandas"
                 install "pandas_datareader"
                 install "yfinance"
+                install "xgboost"
+                install "matplotlib"
+                install "scikit-learn"
                 // Add other necessary Python packages here if needed
             }
         }

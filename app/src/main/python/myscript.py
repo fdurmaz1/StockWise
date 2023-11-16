@@ -45,3 +45,74 @@ def get_recent_close_price(stock_symbol):
 
     # Return a default value or raise an exception based on your app's logic
     return -1
+
+import xgboost as xgb
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+import base64
+from io import BytesIO
+def predict_stock_price(stock_symbol):
+    # Set time range for data
+    end = dt.datetime.now()
+    start = end - dt.timedelta(days=4000)
+
+    # Fetch stock data
+    yfin.pdr_override()
+    df = pdr.data.get_data_yahoo(stock_symbol, start, end)
+
+    # Split the data into 70% training and 30% testing
+    train_data = df.iloc[:int(.99*len(df)), :]
+    test_data = df.iloc[int(.99*len(df)):, :]
+
+    # Define features and target variable
+    features = ['Open', 'Volume']
+    target = 'Close'
+
+    # Create and train the XGBoost model
+    model = xgb.XGBRegressor()
+    model.fit(train_data[features], train_data[target])
+
+    # Make predictions
+    predictions = model.predict(test_data[features])
+
+    latest_prediction = predictions[-1]
+    return latest_prediction
+
+def predict_stock_price_plot(stock_symbol):
+    end = dt.datetime.now()
+    start = end - dt.timedelta(days=4000)
+
+    # Fetch stock data
+    yfin.pdr_override()
+    df = pdr.data.get_data_yahoo(stock_symbol, start, end)
+
+    # Split the data into training and testing
+    train_data, test_data = train_test_split(df, test_size=0.01, shuffle=False)
+
+    # Define features and target variable
+    features = ['Open', 'Volume']
+    target = 'Close'
+
+    # Create and train the XGBoost model
+    model = xgb.XGBRegressor()
+    model.fit(train_data[features], train_data[target])
+
+    # Make predictions
+    predictions = model.predict(test_data[features])
+    # Plot the predictions
+    plt.figure(figsize=(10, 6))
+    plt.plot(df['Close'], label='Close Price')
+    plt.plot(test_data[target].index, predictions, label='Predictions')
+    plt.title(f'Stock Price Prediction for {stock_symbol}')
+    plt.xlabel('Date')
+    plt.ylabel('Price')
+    plt.legend()
+    # Save plot to a BytesIO buffer
+    buf = BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    # Encode the buffer to Base64
+    img_base64 = base64.b64encode(buf.read()).decode('utf-8')
+    buf.close()
+
+    return img_base64

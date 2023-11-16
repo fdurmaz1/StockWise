@@ -34,6 +34,7 @@ android {
                 install "xgboost"
                 install "matplotlib"
                 install "scikit-learn"
+                install "seaborn"
                 // Add other necessary Python packages here if needed
             }
         }

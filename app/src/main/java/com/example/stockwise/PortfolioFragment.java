@@ -12,6 +12,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -98,7 +99,24 @@ public class PortfolioFragment extends Fragment {
         recyclerViewPortfolio.setLayoutManager(new LinearLayoutManager(getContext()));
         progressBar = view.findViewById(R.id.progressBar3); // Initialize the ProgressBar
 
-        portfolioStocksAdapter = new PortfolioStocksAdapter(new ArrayList<>());
+        //portfolioStocksAdapter = new PortfolioStocksAdapter(new ArrayList<>());
+
+        portfolioStocksAdapter = new PortfolioStocksAdapter(portfolioStocks, stockInfo -> {
+            String[] parts = stockInfo.split("\n");
+            if (parts.length >= 2) {
+                String stockSymbol = parts[0];
+                String stockName = parts[1];
+
+                StockAnalysisFragment stockAnalysisFragment = StockAnalysisFragment.newInstance(stockSymbol, stockName);
+                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.frame_layout, stockAnalysisFragment)
+                        .addToBackStack(null)
+                        .commit();
+            }
+        });
+
+
         recyclerViewPortfolio.setAdapter(portfolioStocksAdapter);
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MySharedPref", MODE_PRIVATE);
@@ -212,6 +230,8 @@ public class PortfolioFragment extends Fragment {
                         String stockSymbol = stockObject.getString("symbol"); // Adjust these keys to match your JSON response
                         String stockName = stockObject.getString("name");
                         stocks.add(stockSymbol + "\n" + stockName);
+                        Log.d("PortfolioFragment", "Stock added: " + stockSymbol + "\n" + stockName);
+
                     }
                 }
             } catch (Exception e) {

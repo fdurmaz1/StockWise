@@ -19,25 +19,41 @@ public class PortfolioStocksAdapter extends RecyclerView.Adapter<PortfolioStocks
 
     private List<String> portfolioStocks;
 
+    private OnItemClickListener onItemClickListener;
 
-    public PortfolioStocksAdapter(List<String> portfolioStocks) {
+
+    public PortfolioStocksAdapter(List<String> portfolioStocks, OnItemClickListener onItemClickListener) {
         this.portfolioStocks = portfolioStocks;
+        this.onItemClickListener = onItemClickListener;
     }
+
 
     @NonNull
     @Override
     public PortfolioStocksViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.stock_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.stock_item2, parent, false);
         return new PortfolioStocksViewHolder(view);
+    }
+    public interface OnItemClickListener {
+        void onItemClick(String stockSymbol);
     }
 
     @Override
     public void onBindViewHolder(@NonNull PortfolioStocksViewHolder holder, int position) {
+
         String combined = portfolioStocks.get(position);
         String[] parts = combined.split("\n");
 
         holder.textStockSymbol.setText(parts[0]);
         holder.textStockName.setText(parts[1]);
+        Log.d("PortfolioAdapter", "Binding view: " + combined);
+
+        holder.itemView.setOnClickListener(v -> {
+            if (onItemClickListener != null) {
+                onItemClickListener.onItemClick(combined);
+            }
+        });
+
 
         String selectedSymbol = parts[0]; // Get the stock symbol
 

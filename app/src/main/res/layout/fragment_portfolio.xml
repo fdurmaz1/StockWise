@@ -17,6 +17,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="28dp"
         android:text="Your Portfolio"
+        android:textColor="#000000"
         android:textSize="30dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.126"

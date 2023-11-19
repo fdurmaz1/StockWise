@@ -22,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -49,6 +50,7 @@ public class PortfolioFragment extends Fragment {
     private static PortfolioStocksAdapter portfolioStocksAdapter;
     private static List<String> portfolioStocks = new ArrayList<>();
     private ProgressBar progressBar;
+    private TextView progressText;
 
 
     // TODO: Rename parameter arguments, choose names that match
@@ -98,6 +100,7 @@ public class PortfolioFragment extends Fragment {
         recyclerViewPortfolio = view.findViewById(R.id.recyclerViewPortfolio);
         recyclerViewPortfolio.setLayoutManager(new LinearLayoutManager(getContext()));
         progressBar = view.findViewById(R.id.progressBar3); // Initialize the ProgressBar
+        progressText = view.findViewById(R.id.progressText3);
 
         //portfolioStocksAdapter = new PortfolioStocksAdapter(new ArrayList<>());
 
@@ -183,6 +186,7 @@ public class PortfolioFragment extends Fragment {
             PortfolioFragment fragment = fragmentReference.get();
             if (fragment != null && fragment.progressBar != null) {
                 fragment.progressBar.setVisibility(View.VISIBLE); // Show ProgressBar before fetching data
+                fragment.progressText.setVisibility(View.VISIBLE);
             }
         }
         @Override
@@ -191,6 +195,7 @@ public class PortfolioFragment extends Fragment {
             if (fragment != null) {
                 if (fragment.progressBar != null) {
                     fragment.progressBar.setVisibility(View.GONE); // Hide ProgressBar after fetching data
+                    fragment.progressText.setVisibility(View.GONE);
                 }
 
                 if (stocks != null) {

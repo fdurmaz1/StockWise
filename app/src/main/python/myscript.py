@@ -61,8 +61,8 @@ def predict_stock_price(stock_symbol):
     df = pdr.data.get_data_yahoo(stock_symbol, start, end)
 
     # Split the data into 70% training and 30% testing
-    train_data = df.iloc[:int(.99*len(df)), :]
-    test_data = df.iloc[int(.99*len(df)):, :]
+    train_data = df.iloc[:int(.85*len(df)), :]
+    test_data = df.iloc[int(.85*len(df)):, :]
 
     # Define features and target variable
     features = ['Open', 'Volume']
@@ -87,7 +87,7 @@ def predict_stock_price_plot(stock_symbol):
     df = pdr.data.get_data_yahoo(stock_symbol, start, end)
 
     # Split the data into training and testing
-    train_data, test_data = train_test_split(df, test_size=0.01, shuffle=False)
+    train_data, test_data = train_test_split(df, test_size=0.15, shuffle=False)
 
     # Define features and target variable
     features = ['Open', 'Volume']
@@ -99,17 +99,25 @@ def predict_stock_price_plot(stock_symbol):
 
     # Make predictions
     predictions = model.predict(test_data[features])
+
+    # Filter for the last 3 months
+    three_months_ago = end - dt.timedelta(days=90)
+    filtered_df = df[df.index >= three_months_ago]
+    mask = test_data.index >= three_months_ago
+    filtered_predictions = predictions[mask]
+
     # Plot the predictions
     plt.figure(figsize=(10, 6))
-    plt.plot(df['Close'], label='Close Price')
-    plt.plot(test_data[target].index, predictions, label='Predictions')
-    plt.title(f'Stock Price Prediction for {stock_symbol}', fontsize=20)
+    plt.plot(filtered_df['Close'], label='Close Price')
+    plt.plot(test_data[target][mask].index, filtered_predictions, label='Predictions')
+    plt.title(f'Stock Price Prediction for {stock_symbol} (Last 3 Months)', fontsize=20)
     plt.xlabel('Date', fontsize=16)
     plt.ylabel('Price', fontsize=16)
     plt.legend(fontsize=14)
+
     # Save plot to a BytesIO buffer
     buf = BytesIO()
-    plt.savefig(buf, format='png')
+    plt.savefig(buf, format='png', transparent=True)
     buf.seek(0)
     # Encode the buffer to Base64
     img_base64 = base64.b64encode(buf.read()).decode('utf-8')

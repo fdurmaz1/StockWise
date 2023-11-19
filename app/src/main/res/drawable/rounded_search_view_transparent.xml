@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rounded_search_view.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@android:color/transparent"/> <!-- Set background to transparent -->
+    <corners android:radius="20dp"/> <!-- Rounded corners -->
+    <stroke android:width="3dp" android:color="#1a0757"/> <!-- Border properties -->
+</shape>

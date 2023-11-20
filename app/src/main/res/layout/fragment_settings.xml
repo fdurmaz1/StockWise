@@ -78,7 +78,7 @@
         android:fontFamily="@font/nunitosansregular"
         android:background="@drawable/rounded_search_view_transparent"
         android:gravity="center_vertical"
-        android:text="@string/password2"
+        android:text="********"
         android:textAlignment="center"
         android:textColor="@color/black"
         app:layout_constraintEnd_toEndOf="parent"

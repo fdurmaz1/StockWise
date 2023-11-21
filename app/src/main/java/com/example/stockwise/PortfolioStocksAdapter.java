@@ -1,9 +1,11 @@
 package com.example.stockwise;
 
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -54,11 +56,13 @@ public class PortfolioStocksAdapter extends RecyclerView.Adapter<PortfolioStocks
             }
         });
 
-
         String selectedSymbol = parts[0]; // Get the stock symbol
 
         // Fetch close price for the current symbol and update the respective TextView
-        double closePrice = getRecentClosePrice(selectedSymbol);
+        Double[] recentClosePriceData = getRecentClosePrice(selectedSymbol);
+        double closePrice = recentClosePriceData[0];
+        double priceChange = recentClosePriceData[1];
+        double roundedPriceChange = Math.round(priceChange * 100.0) / 100.0;
 
         if (closePrice != -1) {
             String formattedClosePrice = String.format("%.2f", closePrice);
@@ -66,36 +70,52 @@ public class PortfolioStocksAdapter extends RecyclerView.Adapter<PortfolioStocks
         } else {
             holder.textStockClosePrice.setText("N/A"); // Set default message when close price isn't available
         }
+
+        if (roundedPriceChange > 0) {
+            holder.textStockClosePrice.setTextColor(Color.parseColor("#008000"));
+            holder.imgPriceChange2.setImageResource(R.drawable.baseline_arrow_upward_24);
+        } else if (roundedPriceChange < 0) {
+            holder.textStockClosePrice.setTextColor(Color.parseColor("#FF0000"));
+            holder.imgPriceChange2.setImageResource((R.drawable.baseline_arrow_downward_24));
+        }
     }
 
 
-    private double getRecentClosePrice(String symbol) {
+    private Double[] getRecentClosePrice(String symbol) {
         Python py = Python.getInstance();
         PyObject pyObject = py.getModule("myscript");
-        PyObject getRecentClosePrice = pyObject.callAttr("get_recent_close_price", symbol);
+        PyObject recentClosePriceData = pyObject.callAttr("get_recent_close_price", symbol);
 
-        double closePrice = -1; // Set a default value in case of failure
-
+        Double[] closePriceData = new Double[2];
+        closePriceData[0] = -1.0;
+        closePriceData[1] = 0.0;
         try {
             // Attempt to retrieve the close price from the Python script
-            closePrice = getRecentClosePrice.toDouble();
+            // RCPD short for recentClosePriceData
+            String RCPDstring = recentClosePriceData.toString().replace("(", "").replace(")","");
+//            System.out.println(RCPDstring);
+            String[] tokens = RCPDstring.split(",");
+            closePriceData[0] = Double.parseDouble(tokens[0]);
+            closePriceData[1] = Double.parseDouble(tokens[1]);
         } catch (PyException e) {
             e.printStackTrace(); // Handle any exceptions here
         }
 
-        return closePrice;
+        return closePriceData;
     }
 
     public static class PortfolioStocksViewHolder extends RecyclerView.ViewHolder {
         TextView textStockSymbol;
         TextView textStockName;
         TextView textStockClosePrice;
+        ImageView imgPriceChange2;
 
         public PortfolioStocksViewHolder(View itemView) {
             super(itemView);
             textStockSymbol = itemView.findViewById(R.id.textStockSymbol);
             textStockName = itemView.findViewById(R.id.textStockName);
             textStockClosePrice = itemView.findViewById(R.id.textStockClosePrice);
+            imgPriceChange2 = itemView.findViewById(R.id.imgPriceChange2);
         }
     }
 

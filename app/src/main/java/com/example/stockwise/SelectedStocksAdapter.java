@@ -2,6 +2,7 @@ package com.example.stockwise;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -48,7 +49,7 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
         TextView textStockSymbol;
         TextView textStockName;
         TextView textStockClosePrice;
-
+        ImageView imgPriceChange;
         ImageView imageView4;
         public SelectedStocksViewHolder(View itemView) {
             super(itemView);
@@ -56,6 +57,7 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
             textStockName = itemView.findViewById(R.id.textStockName);
             textStockClosePrice = itemView.findViewById(R.id.textStockClosePrice);
             imageView4 = itemView.findViewById(R.id.imageView4);
+            imgPriceChange = itemView.findViewById(R.id.imgPriceChange);
             // Initialize other views here if required
         }
     }
@@ -75,8 +77,19 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
         holder.textStockSymbol.setText(parts[0]);
         holder.textStockName.setText(parts[1]);
 
-        double closePrice = getRecentClosePrice(parts[0]);
+        Double[] closePriceData = getRecentClosePrice(parts[0]);
+        double closePrice = closePriceData[0];
+        double priceChange = closePriceData[1];
+        double roundedPriceChange = Math.round(priceChange * 100.0) / 100.0;
         holder.textStockClosePrice.setText(closePrice != -1 ? String.format("%.2f", closePrice) : "N/A");
+
+        if (roundedPriceChange > 0) {
+            holder.textStockClosePrice.setTextColor(Color.parseColor("#008000"));
+            holder.imgPriceChange.setImageResource(R.drawable.baseline_arrow_upward_24);
+        } else if (roundedPriceChange < 0) {
+            holder.textStockClosePrice.setTextColor(Color.parseColor("#FF0000"));
+            holder.imgPriceChange.setImageResource(R.drawable.baseline_arrow_downward_24);
+        }
 
         holder.imageView4.setOnClickListener(v -> {
             SharedPreferences sh = context.getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
@@ -115,7 +128,7 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
         // Add the stock to the database
         String[] field = new String[]{"userid", "symbol", "name"};
         String[] data = new String[]{String.valueOf(userId), symbol, name};
-        PutData putData = new PutData("http://192.168.1.78/LoginRegister/add_portfolio_entry.php", "POST", field, data);
+        PutData putData = new PutData("http://192.168.56.1/LoginRegister/add_portfolio_entry.php", "POST", field, data);
         if (putData.startPut()) {
             if (putData.onComplete()) {
                 String result = putData.getResult();
@@ -125,21 +138,27 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
     }
 
 
-    private double getRecentClosePrice(String symbol) {
+    private Double[] getRecentClosePrice(String symbol) {
         Python py = Python.getInstance();
         PyObject pyObject = py.getModule("myscript");
-        PyObject getRecentClosePrice = pyObject.callAttr("get_recent_close_price", symbol);
+        PyObject recentClosePriceData = pyObject.callAttr("get_recent_close_price", symbol);
 
-        double closePrice = -1; // Set a default value in case of failure
-
+        Double[] closePriceData = new Double[2];
+        closePriceData[0] = -1.0;
+        closePriceData[1] = 0.0;
         try {
             // Attempt to retrieve the close price from the Python script
-            closePrice = getRecentClosePrice.toDouble();
+            String RCPDstring = recentClosePriceData.toString().replace("(", "").replace(")","");
+            System.out.println(RCPDstring);
+            String[] tokens = RCPDstring.split(",");
+            closePriceData[0] = Double.parseDouble(tokens[0]);
+            closePriceData[1] = Double.parseDouble(tokens[1]);
+
         } catch (PyException e) {
             e.printStackTrace(); // Handle any exceptions here
         }
 
-        return closePrice;
+        return closePriceData;
     }
 
 
@@ -160,7 +179,7 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
             @Override
             protected Boolean doInBackground(Void... voids) {
                 try {
-                    String urlString = "http://192.168.1.78/LoginRegister/check_stock_in_portfolio.php?userid=" + userId + "&symbol=" + URLEncoder.encode(symbol, "UTF-8");
+                    String urlString = "http://192.168.56.1/LoginRegister/check_stock_in_portfolio.php?userid=" + userId + "&symbol=" + URLEncoder.encode(symbol, "UTF-8");
                     Log.d("StockCheck", "Checking URL: " + urlString);
                     URL url = new URL(urlString);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();

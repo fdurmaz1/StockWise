@@ -23,7 +23,7 @@ def get_stock_symbols_with_names():
 def get_recent_close_price(stock_symbol):
     try:
         end = dt.datetime.now()
-        start = end - dt.timedelta(days=1)
+        start = end - dt.timedelta(days=5)
 
         yfin.pdr_override()
         df = pdr.data.get_data_yahoo(stock_symbol, start, end)
@@ -34,7 +34,9 @@ def get_recent_close_price(stock_symbol):
             if not df['Close'].empty:
                 # Access the latest close price
                 latest_close_price = df['Close'].iloc[-1]
-                return latest_close_price
+                second_latest_close_price = df['Close'].iloc[-2]
+                price_change = latest_close_price - second_latest_close_price
+                return latest_close_price, price_change
             else:
                 print("Error: 'Close' series is empty.")
         else:

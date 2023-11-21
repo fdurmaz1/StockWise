@@ -23,7 +23,7 @@ android {
             version "3.8"
         }
         python {
-            buildPython "C:/Users/User/AppData/Local/Programs/Python/Python311/python.exe"
+//            buildPython "C:/Users/User/AppData/Local/Programs/Python/Python311/python.exe"
         }
         python {
             pip {

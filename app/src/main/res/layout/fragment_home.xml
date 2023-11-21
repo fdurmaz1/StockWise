@@ -30,6 +30,8 @@
         android:background="@drawable/rounded_search_view"
         android:iconifiedByDefault="false"
         android:queryHint="Search for a stock"
+        android:maxLines="1"
+        android:inputType="text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.476"

@@ -8,7 +8,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +41,7 @@ public class SettingsFragment extends Fragment {
     private EditText txtFullName, txtUserName, txtEmail, txtPassword;
     private Button btnUpdate, btnSignOut;
     private int userId;
+    private boolean isPasswordEdited = false;
     private String originalPassword; // To store the original password
 
     @Override
@@ -61,6 +64,24 @@ public class SettingsFragment extends Fragment {
             new FetchUserInfoTask().execute("http://192.168.1.78/LoginRegister/fetch_user_info.php?userid=" + userId);
         }
 
+        txtPassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Not needed here
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Set the flag to true when the user edits the password
+                isPasswordEdited = true;
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Not needed here
+            }
+        });
+
         btnUpdate.setOnClickListener(v -> updateUserInformation());
         btnSignOut.setOnClickListener(v -> signOutUser());
 
@@ -72,30 +93,11 @@ public class SettingsFragment extends Fragment {
         String fullName = txtFullName.getText().toString();
         String userName = txtUserName.getText().toString();
         String email = txtEmail.getText().toString();
-        String password = txtPassword.getText().toString();
+        String password = isPasswordEdited ? txtPassword.getText().toString() : null;
 
-        // Check if password is changed
-        boolean isPasswordChanged = !password.equals(originalPassword);
-
-        new UpdateUserInfoTask().execute(userId, fullName, userName, email, isPasswordChanged ? password : null);
+        new UpdateUserInfoTask().execute(userId, fullName, userName, email, password);
     }
 
-    private void signOutUser() {
-        // Clear shared preferences
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MySharedPref", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear();
-        editor.apply();
-
-        redirectToLogin();
-    }
-
-    private void redirectToLogin() {
-        // Replace with your actual navigation logic
-        Intent intent = new Intent(getActivity(), Login.class);
-        startActivity(intent);
-        getActivity().finish();
-    }
 
     private class FetchUserInfoTask extends AsyncTask<String, Void, String> {
         @Override
@@ -162,10 +164,9 @@ public class SettingsFragment extends Fragment {
                         "&" + URLEncoder.encode("username", "UTF-8") + "=" + URLEncoder.encode((String) params[2], "UTF-8") +
                         "&" + URLEncoder.encode("email", "UTF-8") + "=" + URLEncoder.encode((String) params[3], "UTF-8");
 
-                // Include the password in the data only if it's been changed
-                String newPassword = (String) params[4];
-                if (newPassword != null && !newPassword.isEmpty()) {
-                    data += "&" + URLEncoder.encode("password", "UTF-8") + "=" + URLEncoder.encode(newPassword, "UTF-8");
+                // Only add the password parameter if it was edited
+                if (params[4] != null) {
+                    data += "&" + URLEncoder.encode("password", "UTF-8") + "=" + URLEncoder.encode((String) params[4], "UTF-8");
                 }
 
                 writer.write(data);
@@ -187,19 +188,34 @@ public class SettingsFragment extends Fragment {
             }
         }
 
+
         @Override
         protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            if (result != null && result.equals("Update successful")) {
-                Log.d("SettingsFragment", "User info updated successfully");
+            if (result != null && !result.contains("Failed")) { // Adjust this condition based on actual server response
+                isPasswordEdited = false;
                 Toast.makeText(getActivity(), "Information updated successfully", Toast.LENGTH_SHORT).show();
             } else {
-                Log.e("SettingsFragment", "Failed to update user info: " + result);
-                Toast.makeText(getActivity(), "Failed to update information", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Failed to update information: " + result, Toast.LENGTH_SHORT).show();
             }
         }
     }
 
 
+    private void signOutUser() {
+        // Clear shared preferences
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("MySharedPref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.apply();
+
+        redirectToLogin();
+    }
+
+    private void redirectToLogin() {
+        // Replace with your actual navigation logic
+        Intent intent = new Intent(getActivity(), Login.class);
+        startActivity(intent);
+        getActivity().finish();
+    }
 
 }

@@ -2,6 +2,7 @@ package com.example.stockwise;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -48,7 +49,7 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
         TextView textStockSymbol;
         TextView textStockName;
         TextView textStockClosePrice;
-
+        ImageView imgPriceChange;
         ImageView imageView4;
         public SelectedStocksViewHolder(View itemView) {
             super(itemView);
@@ -56,6 +57,7 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
             textStockName = itemView.findViewById(R.id.textStockName);
             textStockClosePrice = itemView.findViewById(R.id.textStockClosePrice);
             imageView4 = itemView.findViewById(R.id.imageView4);
+            imgPriceChange = itemView.findViewById(R.id.imgPriceChange);
             // Initialize other views here if required
         }
     }
@@ -75,8 +77,30 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
         holder.textStockSymbol.setText(parts[0]);
         holder.textStockName.setText(parts[1]);
 
-        double closePrice = getRecentClosePrice(parts[0]);
-        holder.textStockClosePrice.setText(closePrice != -1 ? String.format("%.2f", closePrice) : "N/A");
+        Double[] closePriceData = getRecentClosePrice(parts[0]);
+        Double closePrice = closePriceData[0];
+        Double priceChange = closePriceData[1];
+
+        if (closePrice != null) {
+            double roundedPriceChange = Math.round(priceChange * 100.0) / 100.0;
+            holder.textStockClosePrice.setText(String.format("%.2f", closePrice));
+
+            if (roundedPriceChange > 0) {
+                holder.textStockClosePrice.setTextColor(Color.parseColor("#008000")); // Green for positive change
+                holder.imgPriceChange.setImageResource(R.drawable.baseline_arrow_upward_24);
+            } else if (roundedPriceChange < 0) {
+                holder.textStockClosePrice.setTextColor(Color.parseColor("#FF0000")); // Red for negative change
+                holder.imgPriceChange.setImageResource(R.drawable.baseline_arrow_downward_24);
+            } else {
+                holder.textStockClosePrice.setTextColor(Color.parseColor("#000000")); // Black for no change
+                holder.imgPriceChange.setImageResource(R.drawable.neutral_symbol); // Neutral icon
+            }
+        } else {
+            holder.textStockClosePrice.setText("N/A");
+            holder.textStockClosePrice.setTextColor(Color.parseColor("#000000")); // Reset to default color
+            holder.imgPriceChange.setImageResource(R.drawable.neutral_symbol); // Neutral icon for missing data
+        }
+
 
         holder.imageView4.setOnClickListener(v -> {
             SharedPreferences sh = context.getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
@@ -125,22 +149,32 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
     }
 
 
-    private double getRecentClosePrice(String symbol) {
+    private Double[] getRecentClosePrice(String symbol) {
         Python py = Python.getInstance();
         PyObject pyObject = py.getModule("myscript");
-        PyObject getRecentClosePrice = pyObject.callAttr("get_recent_close_price", symbol);
+        PyObject recentClosePriceData = pyObject.callAttr("get_recent_close_price", symbol);
 
-        double closePrice = -1; // Set a default value in case of failure
+        Double[] closePriceData = new Double[2];
+        closePriceData[0] = null; // Default to null
+        closePriceData[1] = 0.0; // Default price change to 0.0
 
         try {
-            // Attempt to retrieve the close price from the Python script
-            closePrice = getRecentClosePrice.toDouble();
+            String RCPDstring = recentClosePriceData.toString().replace("(", "").replace(")", "");
+            System.out.println(RCPDstring);
+
+            if (!"None, None".equals(RCPDstring)) {
+                String[] tokens = RCPDstring.split(",");
+                closePriceData[0] = Double.parseDouble(tokens[0]);
+                closePriceData[1] = Double.parseDouble(tokens[1]);
+            }
+
         } catch (PyException e) {
             e.printStackTrace(); // Handle any exceptions here
         }
 
-        return closePrice;
+        return closePriceData;
     }
+
 
 
     @Override

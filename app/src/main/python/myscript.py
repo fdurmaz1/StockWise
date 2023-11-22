@@ -2,6 +2,7 @@ import pandas_datareader as pdr
 from pandas_datareader.nasdaq_trader import get_nasdaq_symbols
 import datetime as dt
 import yfinance as yfin
+import pandas as pd
 
 def get_stock_symbols_with_names():
     nasdaq_symbols = get_nasdaq_symbols()
@@ -23,28 +24,30 @@ def get_stock_symbols_with_names():
 def get_recent_close_price(stock_symbol):
     try:
         end = dt.datetime.now()
-        start = end - dt.timedelta(days=1)
+        start = end - dt.timedelta(days=5)
 
         yfin.pdr_override()
         df = pdr.data.get_data_yahoo(stock_symbol, start, end)
 
-        # Check if the DataFrame is not empty
+
         if not df.empty and 'Close' in df.columns:
-            # Check if there are any rows in the 'Close' series
             if not df['Close'].empty:
-                # Access the latest close price
-                latest_close_price = df['Close'].iloc[-1]
-                return latest_close_price
+                latest_close_price = df['Close'].iloc[-1] if not pd.isna(df['Close'].iloc[-1]) else None
+                second_latest_close_price = df['Close'].iloc[-2] if not pd.isna(df['Close'].iloc[-2]) else None
+
+                if latest_close_price is not None and second_latest_close_price is not None:
+                    price_change = latest_close_price - second_latest_close_price
+                    return latest_close_price, price_change
+                else:
+                    return None, None
             else:
-                print("Error: 'Close' series is empty.")
+                return None, None
         else:
-            print(f"Error: DataFrame is empty or 'Close' column not found for {stock_symbol}")
+            return None, None
 
     except Exception as e:
         print(f"Error fetching close price for {stock_symbol}: {e}")
-
-    # Return a default value or raise an exception based on your app's logic
-    return -1
+        return None, None
 
 import xgboost as xgb
 import matplotlib.pyplot as plt
@@ -61,8 +64,8 @@ def predict_stock_price(stock_symbol):
     df = pdr.data.get_data_yahoo(stock_symbol, start, end)
 
     # Split the data into 70% training and 30% testing
-    train_data = df.iloc[:int(.85*len(df)), :]
-    test_data = df.iloc[int(.85*len(df)):, :]
+    train_data = df.iloc[:int(.90*len(df)), :]
+    test_data = df.iloc[int(.90*len(df)):, :]
 
     # Define features and target variable
     features = ['Open', 'Volume']
@@ -87,7 +90,7 @@ def predict_stock_price_plot(stock_symbol):
     df = pdr.data.get_data_yahoo(stock_symbol, start, end)
 
     # Split the data into training and testing
-    train_data, test_data = train_test_split(df, test_size=0.15, shuffle=False)
+    train_data, test_data = train_test_split(df, test_size=0.10, shuffle=False)
 
     # Define features and target variable
     features = ['Open', 'Volume']

@@ -4,22 +4,36 @@ import datetime as dt
 import yfinance as yfin
 import pandas as pd
 
+# def get_stock_symbols_with_names():
+#     nasdaq_symbols = get_nasdaq_symbols()
+#     stock_list_with_names = nasdaq_symbols[['Security Name']].loc[nasdaq_symbols.index.isin(get_nasdaq_symbols().index)]
+#
+#     formatted_output = []
+#
+#     for index, row in stock_list_with_names.iterrows():
+#         symbol = index
+#         if not isinstance(row['Security Name'], float):  # Check if the value is not a float
+#             name_parts = row['Security Name'].split(' ')[:3]  # Take the first three words
+#             shortened_name = ' '.join(name_parts)
+#         else:
+#             shortened_name = str(row['Security Name'])  # Convert float to string
+#         formatted_output.append(f"{symbol} {shortened_name}")  # Removed the dash
+#
+#     return formatted_output
+
 def get_stock_symbols_with_names():
     nasdaq_symbols = get_nasdaq_symbols()
-    stock_list_with_names = nasdaq_symbols[['Security Name']].loc[nasdaq_symbols.index.isin(get_nasdaq_symbols().index)]
 
-    formatted_output = []
+    # Store the result of the function call in a variable to avoid repetition
+    stock_list_with_names = nasdaq_symbols[['Security Name']]
 
-    for index, row in stock_list_with_names.iterrows():
-        symbol = index
-        if not isinstance(row['Security Name'], float):  # Check if the value is not a float
-            name_parts = row['Security Name'].split(' ')[:3]  # Take the first three words
-            shortened_name = ' '.join(name_parts)
-        else:
-            shortened_name = str(row['Security Name'])  # Convert float to string
-        formatted_output.append(f"{symbol} {shortened_name}")  # Removed the dash
+    formatted_output = [
+        f"{symbol} - {' '.join(security_name.split()[:4])}" if isinstance(security_name, str) else f"{symbol} - {str(security_name)}"
+        for symbol, security_name in stock_list_with_names.itertuples(index=True, name=None)
+    ]
 
     return formatted_output
+
 
 def get_recent_close_price(stock_symbol):
     try:

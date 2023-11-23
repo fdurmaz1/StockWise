@@ -8,6 +8,20 @@
     android:background="@color/material_dynamic_neutral50"
     tools:context=".NewsFragment">
 
+    <EditText
+        android:id="@+id/editTextInput"
+        android:layout_width="316dp"
+        android:layout_height="370dp"
+        android:ems="10"
+        android:inputType="text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.318"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.125" />
+
+
     <Button
         android:id="@+id/btnAnalyze"
         android:layout_width="wrap_content"
@@ -15,6 +29,7 @@
         android:text="Analyze"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+
         app:layout_constraintHorizontal_bias="0.06"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextInput"
@@ -33,5 +48,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.045" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

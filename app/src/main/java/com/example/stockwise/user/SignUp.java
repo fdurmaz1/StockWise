@@ -90,6 +90,36 @@ public class SignUp extends AppCompatActivity {
                                             Toast.makeText(SignUp.this, result, Toast.LENGTH_SHORT).show();
                                         }
                                         Log.i("PutData", result);
+                    progressBar.setVisibility(View.VISIBLE);
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Starting Write and Read data with URL
+                            //Creating array for parameters
+                            String[] field = new String[4];
+                            field[0] = "fullname";
+                            field[1] = "username";
+                            field[2] = "password";
+                            field[3] = "email";
+                            //Creating array for data
+                            String[] data = new String[4];
+                            data[0] = fullname;
+                            data[1] = username;
+                            data[2] = password;
+                            data[3] = email;
+                            PutData putData = new PutData("http://192.168.56.1/LoginRegister/signup.php", "POST", field, data);
+                            if (putData.startPut()) {
+                                if (putData.onComplete()) {
+                                    progressBar.setVisibility(View.GONE);
+                                    String result = putData.getResult();
+                                    if (result.equals("Sign Up Success")){
+                                        Toast.makeText(SignUp.this, result, Toast.LENGTH_SHORT).show();
+                                        Intent intent = new Intent(getApplicationContext(), Login.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }else {
+                                        Toast.makeText(SignUp.this, result, Toast.LENGTH_SHORT).show();
                                     }
                                 }
                                 //End Write and Read data with URL

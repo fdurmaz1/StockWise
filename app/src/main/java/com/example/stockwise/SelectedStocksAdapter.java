@@ -139,7 +139,7 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
         // Add the stock to the database
         String[] field = new String[]{"userid", "symbol", "name"};
         String[] data = new String[]{String.valueOf(userId), symbol, name};
-        PutData putData = new PutData("http://192.168.1.78/LoginRegister/add_portfolio_entry.php", "POST", field, data);
+        PutData putData = new PutData("http://192.168.56.1/LoginRegister/add_portfolio_entry.php", "POST", field, data);
         if (putData.startPut()) {
             if (putData.onComplete()) {
                 String result = putData.getResult();
@@ -194,7 +194,7 @@ public class SelectedStocksAdapter extends RecyclerView.Adapter<SelectedStocksAd
             @Override
             protected Boolean doInBackground(Void... voids) {
                 try {
-                    String urlString = "http://192.168.1.78/LoginRegister/check_stock_in_portfolio.php?userid=" + userId + "&symbol=" + URLEncoder.encode(symbol, "UTF-8");
+                    String urlString = "http://192.168.56.1/LoginRegister/check_stock_in_portfolio.php?userid=" + userId + "&symbol=" + URLEncoder.encode(symbol, "UTF-8");
                     Log.d("StockCheck", "Checking URL: " + urlString);
                     URL url = new URL(urlString);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();

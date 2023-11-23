@@ -95,9 +95,20 @@ public class SettingsFragment extends Fragment {
         String email = txtEmail.getText().toString();
         String password = isPasswordEdited ? txtPassword.getText().toString() : null;
 
+        if (password != null && !isValidPassword(password)) {
+            Toast.makeText(getActivity(), "Password must be at least 8 characters long and contain at least one symbol.", Toast.LENGTH_LONG).show();
+            return;
+        }
         new UpdateUserInfoTask().execute(userId, fullName, userName, email, password);
     }
 
+    private boolean isValidPassword(String password) {
+        if (password.length() < 8) {
+            return false;
+        }
+        boolean hasSymbol = !password.matches("[A-Za-z0-9 ]*"); // Checks if password contains a character that is not a letter, digit, or space
+        return hasSymbol;
+    }
 
     private class FetchUserInfoTask extends AsyncTask<String, Void, String> {
         @Override

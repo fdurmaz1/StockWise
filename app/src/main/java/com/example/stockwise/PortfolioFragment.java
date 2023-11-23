@@ -206,7 +206,7 @@ public class PortfolioFragment extends Fragment {
 
         private List<String> fetchStocksFromDatabase() {
             List<String> stocks = new ArrayList<>();
-            String urlString = "http://192.168.56.1/LoginRegister/get_user_portfolio.php?userid=" + userId;
+            String urlString = "http://192.168.1.78/LoginRegister/get_user_portfolio.php?userid=" + userId;
 
             try {
                 URL url = new URL(urlString);
@@ -257,7 +257,7 @@ public class PortfolioFragment extends Fragment {
     private void deleteStockFromDatabase(String stock, int position) {
         String symbol = extractSymbolFromStockString(stock);
         String name = stock.substring(symbol.length()).trim();
-        String urlString = "http://192.168.56.1/LoginRegister/delete_stock.php?symbol=" + Uri.encode(symbol);
+        String urlString = "http://192.168.1.78/LoginRegister/delete_stock.php?symbol=" + Uri.encode(symbol);
         Log.d("DeleteStock", "URL: " + urlString); // Log the URL
 
         new AsyncTask<String, Void, Boolean>() {

@@ -196,7 +196,7 @@ public class Login extends AppCompatActivity {
                     // Handle JSON parsing error
                 }
             } else {
-                Toast.makeText(activity.getApplicationContext(), result, Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity.getApplicationContext(), "Username or Password wrong", Toast.LENGTH_SHORT).show();
             }
         }
     }

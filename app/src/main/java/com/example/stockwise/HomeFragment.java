@@ -41,6 +41,8 @@ public class HomeFragment extends Fragment implements SelectedStocksAdapter.OnSt
 
     private RecyclerView recyclerView;
     ProgressBar progressBar;
+    private TextView progressText;
+
     //search
     private SearchView searchView;
     private MatrixCursor cursor;
@@ -90,6 +92,7 @@ public class HomeFragment extends Fragment implements SelectedStocksAdapter.OnSt
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         progressBar = view.findViewById(R.id.progressBar2);
+        progressText = view.findViewById(R.id.progressText2);
 
         // Create adapter if null
         if (selectedStocksAdapter == null) {
@@ -222,6 +225,13 @@ public class HomeFragment extends Fragment implements SelectedStocksAdapter.OnSt
 
     // AsyncTask to fetch Python data in the background
     private class PythonDataFetchTask extends AsyncTask<Void, Void, List<String>> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressBar.setVisibility(View.VISIBLE);
+            progressText.setVisibility(View.VISIBLE); // Show progress text
+        }
+
 
         @Override
         protected List<String> doInBackground(Void... voids) {
@@ -250,7 +260,9 @@ public class HomeFragment extends Fragment implements SelectedStocksAdapter.OnSt
 
             StockSuggestionAdapter suggestionAdapter = new StockSuggestionAdapter(getActivity(), cursor, 0);
             searchView.setSuggestionsAdapter(suggestionAdapter);
+
             progressBar.setVisibility(View.GONE);
+            progressText.setVisibility(View.GONE);
         }
     }
 

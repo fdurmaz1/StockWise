@@ -30,6 +30,9 @@ android {
                 install "pandas"
                 install "pandas_datareader"
                 install "yfinance"
+                install "xgboost"
+                install "matplotlib"
+                install "scikit-learn"
                 install "protobuf==3.8.0"
 //                install "tensorflow"
                 // Add other necessary Python packages here if needed

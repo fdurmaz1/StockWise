@@ -57,6 +57,39 @@ public class SignUp extends AppCompatActivity {
                 email = String.valueOf(textInputEditTextEmail.getText());
 
                 if (!fullname.equals("") && !username.equals("") && !password.equals("") && !email.equals("")) {
+                    if (isValidPassword(password)){
+                        progressBar.setVisibility(View.VISIBLE);
+                        Handler handler = new Handler(Looper.getMainLooper());
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                //Starting Write and Read data with URL
+                                //Creating array for parameters
+                                String[] field = new String[4];
+                                field[0] = "fullname";
+                                field[1] = "username";
+                                field[2] = "password";
+                                field[3] = "email";
+                                //Creating array for data
+                                String[] data = new String[4];
+                                data[0] = fullname;
+                                data[1] = username;
+                                data[2] = password;
+                                data[3] = email;
+                                PutData putData = new PutData("http://192.168.1.78/LoginRegister/signup.php", "POST", field, data);
+                                if (putData.startPut()) {
+                                    if (putData.onComplete()) {
+                                        progressBar.setVisibility(View.GONE);
+                                        String result = putData.getResult();
+                                        if (result.equals("Sign Up Success")){
+                                            Toast.makeText(SignUp.this, result, Toast.LENGTH_SHORT).show();
+                                            Intent intent = new Intent(getApplicationContext(), Login.class);
+                                            startActivity(intent);
+                                            finish();
+                                        }else {
+                                            Toast.makeText(SignUp.this, result, Toast.LENGTH_SHORT).show();
+                                        }
+                                        Log.i("PutData", result);
                     progressBar.setVisibility(View.VISIBLE);
                     Handler handler = new Handler(Looper.getMainLooper());
                     handler.post(new Runnable() {
@@ -88,17 +121,27 @@ public class SignUp extends AppCompatActivity {
                                     }else {
                                         Toast.makeText(SignUp.this, result, Toast.LENGTH_SHORT).show();
                                     }
-                                    Log.i("PutData", result);
                                 }
+                                //End Write and Read data with URL
                             }
-                            //End Write and Read data with URL
-                        }
-                    });
+                        });
+                    }else {
+                        Toast.makeText(SignUp.this, "Password must be at least 8 characters long and contain at least one symbol.", Toast.LENGTH_LONG).show();
+                    }
                 }else {
                     Toast.makeText(SignUp.this, "All fields are required.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
+    }
+
+
+    private boolean isValidPassword(String password) {
+        if (password.length() < 8) {
+            return false;
+        }
+        boolean hasSymbol = !password.matches("[A-Za-z0-9 ]*"); // Checks if password contains a character that is not a letter, digit, or space
+        return hasSymbol;
     }
 }

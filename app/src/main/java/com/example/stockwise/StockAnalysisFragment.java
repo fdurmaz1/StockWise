@@ -96,8 +96,15 @@ public class StockAnalysisFragment extends Fragment {
             stockSymbol = getArguments().getString(ARG_STOCK_SYMBOL);
             stockName = getArguments().getString(ARG_STOCK_NAME);
             showStockPrediction(stockSymbol);
-            showStockPredictionPlot(stockSymbol);
+            showStockPredictionPlot(stockSymbol, 730);  // Show last 2 years by default
         }
+        Button buttonOneYear = view.findViewById(R.id.buttonOneYear);
+        Button buttonSixMonths = view.findViewById(R.id.buttonSixMonths);
+        Button buttonThreeMonths = view.findViewById(R.id.buttonThreeMonths);
+
+        buttonOneYear.setOnClickListener(v -> showStockPredictionPlot(stockSymbol, 365));
+        buttonSixMonths.setOnClickListener(v -> showStockPredictionPlot(stockSymbol, 180));
+        buttonThreeMonths.setOnClickListener(v -> showStockPredictionPlot(stockSymbol, 90));
 
         // Initialize your views and start the analysis
         return view;
@@ -135,14 +142,14 @@ public class StockAnalysisFragment extends Fragment {
     }
 
     // Inside StockAnalysisFragment class
-    private void showStockPredictionPlot(String stockSymbol) {
+    private void showStockPredictionPlot(String stockSymbol, int days) {
         new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... voids) {
                 try {
                     Python py = Python.getInstance();
                     PyObject pyObject = py.getModule("myscript");
-                    return pyObject.callAttr("predict_stock_price_plot", stockSymbol).toString();
+                    return pyObject.callAttr("predict_stock_price_plot", stockSymbol, days).toString();
                 } catch (PyException e) {
                     e.printStackTrace();
                     return null;

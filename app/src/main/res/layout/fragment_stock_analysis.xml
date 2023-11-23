@@ -85,6 +85,49 @@
         app:layout_constraintTop_toBottomOf="@+id/txtStockSymbolAnalysis"
         app:layout_constraintVertical_bias="0.974" />
 
+
+    <LinearLayout
+        android:layout_width="362dp"
+        android:layout_height="116dp"
+        android:layout_marginTop="100dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.673"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.108">
+
+        <Button
+            android:id="@+id/buttonOneYear"
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:text="@string/one_year"
+
+            android:textSize="10dp" />
+
+        <Button
+            android:id="@+id/buttonSixMonths"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:text="@string/six_months"
+            android:textSize="10dp" />
+
+        <Button
+            android:id="@+id/buttonThreeMonths"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:text="@string/three_months"
+            android:textSize="10dp" />
+    </LinearLayout>
+
     <!-- Add more views for your analysis -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -21,19 +21,6 @@ def get_stock_symbols_with_names():
 
     return formatted_output
 
-# def get_stock_symbols_with_names():
-#     nasdaq_symbols = get_nasdaq_symbols()
-#
-#     # Store the result of the function call in a variable to avoid repetition
-#     stock_list_with_names = nasdaq_symbols[['Security Name']]
-#
-#     formatted_output = [
-#         f"{symbol} - {' '.join(security_name.split()[:4])}" if isinstance(security_name, str) else f"{symbol} - {str(security_name)}"
-#         for symbol, security_name in stock_list_with_names.itertuples(index=True, name=None)
-#     ]
-#
-#     return formatted_output
-
 
 def get_recent_close_price(stock_symbol):
     try:

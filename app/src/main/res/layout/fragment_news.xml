@@ -5,23 +5,36 @@
     android:id="@+id/frameLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/material_dynamic_neutral50"
+    android:background="@color/white"
     tools:context=".NewsFragment">
+
 
     <EditText
         android:id="@+id/editTextInput"
+        style="@style/SearchViewStyle"
         android:layout_width="316dp"
         android:layout_height="370dp"
+        android:background="@drawable/rounded_search_view"
         android:ems="10"
-        android:inputType="text"
+        android:hint="Enter the news here to be analyzed..."
+        android:queryHint="Enter the news here to be analyzed..."
+        android:gravity="top|start"
+        android:iconifiedByDefault="false"
+        android:inputType="textMultiLine"
+        android:queryBackground="@null"
+        android:scrollbars="vertical"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.318"
+        app:layout_constraintHorizontal_bias="0.494"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.125"
+        app:layout_constraintVertical_bias="0.119"
         tools:ignore="SpeakableTextPresentCheck" />
-
 
     <Button
         android:id="@+id/btnAnalyze"
@@ -30,10 +43,10 @@
         android:text="Analyze"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.06"
+        app:layout_constraintHorizontal_bias="0.15"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextInput"
-        app:layout_constraintVertical_bias="0.194" />
+        app:layout_constraintVertical_bias="0.192" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

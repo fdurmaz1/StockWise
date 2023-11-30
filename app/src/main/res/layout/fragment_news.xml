@@ -24,11 +24,11 @@
         android:id="@+id/editTextInput"
         style="@style/SearchViewStyle"
         android:layout_width="316dp"
-        android:layout_height="370dp"
+        android:layout_height="330dp"
         android:background="@drawable/rounded_search_view"
         android:ems="10"
         android:gravity="top|start"
-        android:hint="Enter the news here to be analyzed. Please do not paste images. "
+        android:hint="Enter the news here to be analyzed. Please do not paste images. \n\nNote: Our predictions should be taken with caution. We cannot be held liable for any losses from decisions made based on information of our app."
         android:iconifiedByDefault="false"
         android:inputType="textMultiLine"
         android:paddingLeft="20dp"
@@ -61,7 +61,7 @@
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextInput"
-        app:layout_constraintVertical_bias="0.446" />
+        app:layout_constraintVertical_bias="0.758" />
 
     <Button
         android:id="@+id/btnClear"
@@ -76,17 +76,6 @@
         app:layout_constraintTop_toBottomOf="@+id/editTextInput"
         app:layout_constraintVertical_bias="0.066" />
 
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="331dp"
-        android:layout_height="55dp"
-        android:text="Note: Our predictions should be taken with caution. We cannot be held liable for any losses from decisions made based on information of our app."
-        android:textAlignment="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imgSentimentBars"
-        app:layout_constraintVertical_bias="0.195" />
 
     <ImageView
         android:id="@+id/imgSentimentBars"
@@ -95,10 +84,10 @@
         android:src="@drawable/emptybars"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.506"
+        app:layout_constraintHorizontal_bias="0.493"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtSentimentMessage"
-        app:layout_constraintVertical_bias="0.121" />
+        app:layout_constraintVertical_bias="0.194" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

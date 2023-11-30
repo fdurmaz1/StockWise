@@ -4,20 +4,33 @@ import datetime as dt
 import yfinance as yfin
 import pandas as pd
 
+# def get_stock_symbols_with_names():
+#     nasdaq_symbols = get_nasdaq_symbols()
+#     stock_list_with_names = nasdaq_symbols[['Security Name']].loc[nasdaq_symbols.index.isin(get_nasdaq_symbols().index)]
+#
+#     formatted_output = []
+#
+#     for index, row in stock_list_with_names.iterrows():
+#         symbol = index
+#         if not isinstance(row['Security Name'], float):  # Check if the value is not a float
+#             name_parts = row['Security Name'].split(' ')[:3]  # Take the first three words
+#             shortened_name = ' '.join(name_parts)
+#         else:
+#             shortened_name = str(row['Security Name'])  # Convert float to string
+#         formatted_output.append(f"{symbol} {shortened_name}")  # Removed the dash
+#
+#     return formatted_output
+
 def get_stock_symbols_with_names():
     nasdaq_symbols = get_nasdaq_symbols()
-    stock_list_with_names = nasdaq_symbols[['Security Name']].loc[nasdaq_symbols.index.isin(get_nasdaq_symbols().index)]
 
-    formatted_output = []
+    # Store the result of the function call in a variable to avoid repetition
+    stock_list_with_names = nasdaq_symbols[['Security Name']]
 
-    for index, row in stock_list_with_names.iterrows():
-        symbol = index
-        if not isinstance(row['Security Name'], float):  # Check if the value is not a float
-            name_parts = row['Security Name'].split(' ')[:3]  # Take the first three words
-            shortened_name = ' '.join(name_parts)
-        else:
-            shortened_name = str(row['Security Name'])  # Convert float to string
-        formatted_output.append(f"{symbol} {shortened_name}")  # Removed the dash
+    formatted_output = [
+        f"{symbol} - {' '.join(security_name.split()[:4])}" if isinstance(security_name, str) else f"{symbol} - {str(security_name)}"
+        for symbol, security_name in stock_list_with_names.itertuples(index=True, name=None)
+    ]
 
     return formatted_output
 
@@ -82,7 +95,7 @@ def predict_stock_price(stock_symbol):
     latest_prediction = predictions[-1]
     return latest_prediction
 
-def predict_stock_price_plot(stock_symbol, days=730):  # Default to last two years (730 days)
+def predict_stock_price_plot(stock_symbol):
     end = dt.datetime.now()
     start = end - dt.timedelta(days=4000)
 
@@ -105,28 +118,16 @@ def predict_stock_price_plot(stock_symbol, days=730):  # Default to last two yea
     predictions = model.predict(test_data[features])
 
     # Filter for the last 3 months
-    filter_date = end - dt.timedelta(days=days)
-    filtered_df = df[df.index >= filter_date]
-    mask = test_data.index >= filter_date
+    three_months_ago = end - dt.timedelta(days=90)
+    filtered_df = df[df.index >= three_months_ago]
+    mask = test_data.index >= three_months_ago
     filtered_predictions = predictions[mask]
 
-    # Determine the title based on the number of days
-    if days == 730:
-        time_frame = "2 Years"
-    elif days == 365:
-        time_frame = "1 Year"
-    elif days == 180:
-        time_frame = "6 Months"
-    elif days == 90:
-        time_frame = "3 Months"
-    else:
-        time_frame = f"{days} Days"
-
-    # Plot the predictions with dynamic title
+    # Plot the predictions
     plt.figure(figsize=(10, 6))
     plt.plot(filtered_df['Close'], label='Close Price')
     plt.plot(test_data[target][mask].index, filtered_predictions, label='Predictions')
-    plt.title(f'Stock Price Prediction for {stock_symbol} (Last {time_frame})', fontsize=20)
+    plt.title(f'Stock Price Prediction for {stock_symbol} (Last 3 Months)', fontsize=20)
     plt.xlabel('Date', fontsize=16)
     plt.ylabel('Price', fontsize=16)
     plt.legend(fontsize=14)

@@ -2,4 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="stockwise">#1a0757</color>
+    <color name="skyblue">#87CEEB</color>
+    <color name="red">#F80C1F</color>
 </resources>

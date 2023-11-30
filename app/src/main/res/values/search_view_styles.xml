@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="SearchViewStyle" parent="Widget.AppCompat.SearchView">
+        <!-- Set the color of the bottom line to transparent to hide it -->
+        <item name="queryBackground">@android:color/transparent</item>
+    </style>
+</resources>

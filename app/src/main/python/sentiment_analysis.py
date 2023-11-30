@@ -8,14 +8,8 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.models import model_from_json
 import tensorflow as tf
 from os.path import dirname, join
-# import json
 
 def analyze_sentences(text):
-    tokenizer = Tokenizer()
-    tokenizer_filename = join(dirname(__file__), "tokenizer.pickle")
-    with open(tokenizer_filename, 'rb') as handle:
-        tokenizer = pickle.load(handle)
-
     text = text.replace('!', '.')
     text = text.replace('?', '.')
     text = text.split('. ')
@@ -26,10 +20,15 @@ def analyze_sentences(text):
         if text[i].count(" ") >= (longest - 1):
             text[i] = " ".join(text[i].split(" ", longest) [:longest])
 
+    tokenizer = Tokenizer()
+    tokenizer_filename = join(dirname(__file__), "tokenizer.pickle")
+    with open(tokenizer_filename, 'rb') as handle:
+        tokenizer = pickle.load(handle)
+
     new_sentences = tokenizer.texts_to_sequences(text)
     npadded_sentences = pad_sequences(new_sentences, longest, padding='post')
 
-    model_filename = join(dirname(__file__), 'financial_sentiment_analysis_model_softmax.keras')
+    model_filename = join(dirname(__file__), 'sentence_sentiment_analyzer.keras')
     model = load_model(model_filename, compile=False)
 
     return model.predict(npadded_sentences)
@@ -82,7 +81,6 @@ def process_money(match_obj):
 
 def analyze_article(article):
     article_predictions = analyze_sentences(article)
-    print(article_predictions)
 
     prefiltered_predictions = article_predictions
     k = 0
@@ -99,9 +97,10 @@ def analyze_article(article):
         article_predictions = np.vstack([article_predictions, empty_array])
 
     article_predictions = article_predictions.tolist()
-    model_end_filename = join(dirname(__file__), 'article_financial_sentiment_analyzer_60.keras')
+    model_end_filename = join(dirname(__file__), 'article_sentiment_analyzer.keras')
     model_end = load_model(model_end_filename, compile=False)
     sentiment_probabilities = model_end.predict([article_predictions])
 
     return np.argmax(sentiment_probabilities[0])
 
+analyze_article("sample article")

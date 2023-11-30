@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +38,8 @@ public class NewsFragment extends Fragment {
     Button btnAnalyze, btnClear;
     EditText editTextInput;
     TextView txtSentimentMessage;
+
+    ImageView imgSentimentBars;
     public NewsFragment() {
         // Required empty public constructor
     }
@@ -82,7 +85,7 @@ public class NewsFragment extends Fragment {
         btnAnalyze = newsView.findViewById(R.id.btnAnalyze);
         editTextInput = newsView.findViewById(R.id.editTextInput);
         txtSentimentMessage = newsView.findViewById(R.id.txtSentimentMessage);
-
+        imgSentimentBars = newsView.findViewById(R.id.imgSentimentBars);
         btnAnalyze.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -90,15 +93,37 @@ public class NewsFragment extends Fragment {
                 PyObject pyo = py.getModule("sentiment_analysis");
                 PyObject obj = pyo.callAttr("analyze_article", txt);
                 int sentimentScore = obj.toInt();
-                System.out.println(sentimentScore);
-                String sentimentText = processSentimentScore(sentimentScore);
-                txtSentimentMessage.setText(sentimentText);
-                if (sentimentScore > 2) {
-                    txtSentimentMessage.setTextColor(Color.parseColor("#008000"));
-                } else if (sentimentScore < 2) {
-                    txtSentimentMessage.setTextColor(Color.parseColor("#FF0000"));
-                } else {
-                    txtSentimentMessage.setTextColor(Color.parseColor("#000000"));
+
+                switch(sentimentScore) {
+                    case 0:
+                        txtSentimentMessage.setText("Very Bad News");
+                        imgSentimentBars.setImageResource(R.drawable.verybadbars);
+                        txtSentimentMessage.setTextColor(Color.parseColor("#FF0000"));
+                        break;
+                    case 1:
+                        txtSentimentMessage.setText("Bad News");
+                        imgSentimentBars.setImageResource(R.drawable.badbars);
+                        txtSentimentMessage.setTextColor(Color.parseColor("#FF6600"));
+                        break;
+                    case 2:
+                        txtSentimentMessage.setText("Neutral News");
+                        imgSentimentBars.setImageResource(R.drawable.neutralbars);
+                        txtSentimentMessage.setTextColor(Color.parseColor("#FFFF00"));
+                        break;
+                    case 3:
+                        txtSentimentMessage.setText("Good News");
+                        imgSentimentBars.setImageResource(R.drawable.goodbars);
+                        txtSentimentMessage.setTextColor(Color.parseColor("#C3E937"));
+                        break;
+                    case 4:
+                        txtSentimentMessage.setText("Very Good News");
+                        imgSentimentBars.setImageResource(R.drawable.verygoodbars);
+                        txtSentimentMessage.setTextColor(Color.parseColor("#70AD47"));
+                        break;
+                    default:
+                        txtSentimentMessage.setText("Sentiment Analysis Failed");
+                        txtSentimentMessage.setTextColor(Color.parseColor("#000000"));
+                        imgSentimentBars.setImageResource(R.drawable.emptybars);
                 }
             }
         });
@@ -107,43 +132,13 @@ public class NewsFragment extends Fragment {
         btnClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                txtSentimentMessage.setTextColor(Color.parseColor("#000000"));
                 txtSentimentMessage.setText("");
                 editTextInput.setText("");
+                imgSentimentBars.setImageResource(R.drawable.emptybars);
             }
         });
 
         return newsView;
-    }
-
-    public String processSentimentScore(int sentimentScore) {
-        String sentimentText = "";
-        String veryBadEmoji = new String(Character.toChars(0x1F61E));
-        String badEmoji = new String(Character.toChars(0x1F62A));
-        String neutralEmoji = new String(Character.toChars(0x1F610));
-        String goodEmoji = new String(Character.toChars(0x1F642));
-        String veryGoodEmoji = new String(Character.toChars(0x1F600));
-        String failedEmoji = new String(Character.toChars(0x1F937));
-
-        switch(sentimentScore) {
-            case 0:
-                sentimentText = veryBadEmoji + " Very Bad News " + veryBadEmoji;
-                break;
-            case 1:
-                sentimentText = badEmoji + " Bad News " + badEmoji;
-                break;
-            case 2:
-                sentimentText = neutralEmoji + " Neutral News " + neutralEmoji;
-                break;
-            case 3:
-                sentimentText = goodEmoji + " Good News " + goodEmoji;
-                break;
-            case 4:
-                sentimentText = veryGoodEmoji + " Very Good News " + veryGoodEmoji;
-                break;
-            default:
-                sentimentText = failedEmoji + " Sentiment Analysis Failed " + failedEmoji;
-        }
-
-        return sentimentText;
     }
 }

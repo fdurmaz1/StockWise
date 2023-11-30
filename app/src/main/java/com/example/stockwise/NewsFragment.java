@@ -1,14 +1,18 @@
 package com.example.stockwise;
 
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.provider.CalendarContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chaquo.python.PyObject;
@@ -31,9 +35,11 @@ public class NewsFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    Button btnAnalyze;
+    Button btnAnalyze, btnClear;
     EditText editTextInput;
+    TextView txtSentimentMessage;
 
+    ImageView imgSentimentBars;
     public NewsFragment() {
         // Required empty public constructor
     }
@@ -63,8 +69,6 @@ public class NewsFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
-
     }
 
     @Override
@@ -72,25 +76,69 @@ public class NewsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View newsView = inflater.inflate(R.layout.fragment_news, container, false);
-        if(!Python.isStarted()) {
+        if (!Python.isStarted()) {
             Python.start(new AndroidPlatform(newsView.getContext()));
         }
 
-        final Python py =Python.getInstance();
+        final Python py = Python.getInstance();
 
         btnAnalyze = newsView.findViewById(R.id.btnAnalyze);
         editTextInput = newsView.findViewById(R.id.editTextInput);
+        txtSentimentMessage = newsView.findViewById(R.id.txtSentimentMessage);
+        imgSentimentBars = newsView.findViewById(R.id.imgSentimentBars);
         btnAnalyze.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.out.println(editTextInput.getText().toString());
                 String txt = editTextInput.getText().toString();
                 PyObject pyo = py.getModule("sentiment_analysis");
-                PyObject obj = pyo.callAttr("analyze_sentiment", txt);
-                System.out.println(obj.toString());
-                Toast.makeText(getContext(), txt, Toast.LENGTH_LONG).show();
+                PyObject obj = pyo.callAttr("analyze_article", txt);
+                int sentimentScore = obj.toInt();
+
+                switch(sentimentScore) {
+                    case 0:
+                        txtSentimentMessage.setText("Very Bad News");
+                        imgSentimentBars.setImageResource(R.drawable.verybadbars);
+                        txtSentimentMessage.setTextColor(Color.parseColor("#FF0000"));
+                        break;
+                    case 1:
+                        txtSentimentMessage.setText("Bad News");
+                        imgSentimentBars.setImageResource(R.drawable.badbars);
+                        txtSentimentMessage.setTextColor(Color.parseColor("#FF6600"));
+                        break;
+                    case 2:
+                        txtSentimentMessage.setText("Neutral News");
+                        imgSentimentBars.setImageResource(R.drawable.neutralbars);
+                        txtSentimentMessage.setTextColor(Color.parseColor("#FFFF00"));
+                        break;
+                    case 3:
+                        txtSentimentMessage.setText("Good News");
+                        imgSentimentBars.setImageResource(R.drawable.goodbars);
+                        txtSentimentMessage.setTextColor(Color.parseColor("#C3E937"));
+                        break;
+                    case 4:
+                        txtSentimentMessage.setText("Very Good News");
+                        imgSentimentBars.setImageResource(R.drawable.verygoodbars);
+                        txtSentimentMessage.setTextColor(Color.parseColor("#70AD47"));
+                        break;
+                    default:
+                        txtSentimentMessage.setText("Sentiment Analysis Failed");
+                        txtSentimentMessage.setTextColor(Color.parseColor("#000000"));
+                        imgSentimentBars.setImageResource(R.drawable.emptybars);
+                }
             }
         });
+
+        btnClear = newsView.findViewById(R.id.btnClear);
+        btnClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                txtSentimentMessage.setTextColor(Color.parseColor("#000000"));
+                txtSentimentMessage.setText("");
+                editTextInput.setText("");
+                imgSentimentBars.setImageResource(R.drawable.emptybars);
+            }
+        });
+
         return newsView;
     }
 }

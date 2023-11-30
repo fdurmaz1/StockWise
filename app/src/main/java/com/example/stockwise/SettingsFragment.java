@@ -61,7 +61,7 @@ public class SettingsFragment extends Fragment {
         userId = getActivity().getSharedPreferences("MySharedPref", MODE_PRIVATE).getInt("userid", -1);
 
         if (userId != -1) {
-            new FetchUserInfoTask().execute("http://192.168.1.78/LoginRegister/fetch_user_info.php?userid=" + userId);
+            new FetchUserInfoTask().execute("http://192.168.1.79/LoginRegister/fetch_user_info.php?userid=" + userId);
         }
 
         txtPassword.addTextChangedListener(new TextWatcher() {
@@ -161,7 +161,7 @@ public class SettingsFragment extends Fragment {
         @Override
         protected String doInBackground(Object... params) {
             try {
-                URL url = new URL("http://192.168.1.78/LoginRegister/update_user_info.php");
+                URL url = new URL("http://192.168.1.79/LoginRegister/update_user_info.php");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setDoOutput(true);

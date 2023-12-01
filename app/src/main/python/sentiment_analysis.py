@@ -102,5 +102,3 @@ def analyze_article(article):
     sentiment_probabilities = model_end.predict([article_predictions])
 
     return np.argmax(sentiment_probabilities[0])
-
-analyze_article("sample article")
